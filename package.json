@@ -1,0 +1,13 @@
+{
+  "name": "record",
+  "version": "0.0.1",
+  "dependencies": {
+    "express": "2.5.1",
+    "ejs": "0.6.1",
+    "mongodb": "0.9.7-1.4",
+    "jake": "0.1.21"
+  },
+  "devDependencies": {
+    "mocha": "0.7.0"
+  }
+}

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Share List</title>
+    <link href="http://twitter.github.com/bootstrap/1.4.0/bootstrap.min.css" rel="stylesheet">
+    
+    <style type="text/css">
+      body {
+        padding-top: 40px;
+      }
+      
+      .header-cell {
+        vertical-align: middle;
+      }
+    </style>
+    
+    <!-- Le javascript -->
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="http://autobahn.tablesorter.com/jquery.tablesorter.min.js"></script>
+    <script src="http://twitter.github.com/bootstrap/1.4.0/bootstrap-dropdown.js"></script>
+    <script src="http://twitter.github.com/bootstrap/1.4.0/bootstrap-twipsy.js"></script>
+    <script src="http://twitter.github.com/bootstrap/1.4.0/bootstrap-scrollspy.js"></script>
+    <script src="http://twitter.github.com/bootstrap/1.4.0/bootstrap-modal.js"></script>
+    <script src="http://twitter.github.com/bootstrap/1.4.0/bootstrap-buttons.js"></script>
+    <script src="http://twitter.github.com/bootstrap/1.4.0/bootstrap-alerts.js"></script>
+    <script src="http://documentcloud.github.com/underscore/underscore.js"></script>
+    <script src="http://documentcloud.github.com/backbone/backbone.js"></script>
+    <script src="list.js"></script>
+  </head>  
+  <body>
+    <div class="topbar" data-dropdown="dropdown">
+      <div class="topbar-inner">
+        <div class="container-fluid">
+          <a class="brand" href="#">records</a>
+          <ul class="nav">
+            <li class="active"><a href="#">home</a></li>
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle">actions</a>
+              <ul class="dropdown-menu">
+                <li><a href="#">Add new item</a></li>
+                <li><a href="#">Edit selected</a></li>
+                <li><a href="#">Delete selected</a></li>
+                <li><a href="#">Configure list</a></li>
+                <li class="divider"></li>
+                <li><a href="#">Add new list</a></li>
+                <li><a href="#">Add new library</a></li>
+                <li><a href="#">Add new page</a></li>
+              </ul>
+            </li>
+            <li><a href="#contact">contact</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <ul class="breadcrumb">
+      <li><a href="#">Home</a> <span class="divider">/</span></li>
+      <li class="active"><%- listTitle %></li>
+    </ul>
+      
+    <div class="container-fluid">
+      <div class="sidebar">
+        <div class="well"></div>
+      </div>
+      
+      <div class="content">
+        <!-- 
+          <a class="btn" data-controls-modal="my-modal" data-backdrop="static">Launch</a>
+          <a class="btn" data-controls-modal="another-modal" data-backdrop="static">Launch another</a> 
+        -->
+        <%- body %>
+      </div>
+      
+      <div id="my-modal" class="modal hide fade">
+        <div class="modal-header">
+          <a herf="#" class="close">&times;</a>
+          <h3>Create a new list</h3>
+        </div>
+        <div class="modal-body">
+          <p>Here is what you do</p>
+        </div>
+        <div class="modal-footer">
+          <a href="#" class="btn primary">Primary</a>
+          <a href="#" class="btn secondary">Secondary</a>
+        </div>
+      </div>
+      
+      <div id="another-modal" class="modal hide fade">
+        <div class="modal-header">
+          <a herf="#" class="close">&times;</a>
+          <h3>How about them apples</h3>
+        </div>
+        <div class="modal-body">
+          <p>I got her number</p>
+        </div>
+        <div class="modal-footer">
+          <a href="#" class="btn primary">Primary</a>
+          <a href="#" class="btn secondary">Secondary</a>
+        </div>
+      </div>
+    </div>
+    
+    <script type="text/template" id="sidebar-template">
+      <h5>Sidebar</h5>
+      <ul>
+        <li><a href="#">Link</a></li>
+        <li><a href="#">Link</a></li>
+        <li><a href="#">Link</a></li>
+        <li><a href="#">Link</a></li>
+      </ul>
+    </script>
+  </body>
+</html>
