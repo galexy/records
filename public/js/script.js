@@ -2,11 +2,11 @@
 
 */
 
-Application = Ember.Application.create({
+Application = Em.Application.create({
   listName: 'Accounts',
   
   ready: function() {
-    
+    Application.accountsController.fill();
   }
 });
 
@@ -14,10 +14,10 @@ Application = Ember.Application.create({
  * Models
  **************************/
 
-Application.Account = Ember.Object.extend({
+Application.Account = Em.Object.extend({
   name: '',
   url: '',
-  userName: '',
+  username: '',
   password: '',
   securityQuestion: '',
   securityAnswer: ''
@@ -26,29 +26,25 @@ Application.Account = Ember.Object.extend({
 /**************************
  * Array Controllers
  **************************/
-Application.accountsController = Ember.ArrayController.create({
+Application.accountsController = Em.ArrayProxy.create({
   content: [],
-  init: function() {
-    var account = Application.Account.create({
-      name: 'Amazon',
-      url: 'http://www.amazon.com',
-      userName: 'john@doe.com'
-      password: 'password',
-    });
-    this.pushObject(account);
+  
+  fill: function() {
+    var me = this;
     
-    var account2 = Application.Account.create({
-      name: 'Netflix',
-      url: 'http://www.netflix.com',
-      userName: 'jane@doe.com'
-      password: 'foobar',
+    $.getJSON('/lists/password/all.json', function(data) {
+      $(data).each(function(index, value) {
+        console.log(value);
+        var account = me.createAccount(value);
+      });
     });
-    this.pushObject(account2);
   },
   
-  changeData: function(event) {
-    this.content[0].set('password', 'Foo');
+  createAccount: function(account) {
+    var newAccount = Application.Account.create(account);
+    this.pushObject(newAccount);
   },
+
 });
 
 /*************************

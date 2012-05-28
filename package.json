@@ -2,9 +2,9 @@
   "name": "record",
   "version": "0.0.1",
   "dependencies": {
-    "express": "2.5.1",
+    "express": "2.5.9",
     "ejs": "0.6.1",
-    "mongodb": "0.9.7-1.4",
+    "mongodb": "1.0.2",
     "jake": "0.1.21"
   },
   "devDependencies": {

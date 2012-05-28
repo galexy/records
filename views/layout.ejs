@@ -27,87 +27,85 @@
 <body>
 <!--[if lt IE 7]><p class=chromeframe>Your browser is <em>ancient!</em> <a href="http://browsehappy.com/">Upgrade to a different browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">install Google Chrome Frame</a> to experience this site.</p><![endif]-->
 
-    <div class="navbar navbar-fixed-top">
-      <div class="navbar-inner">
-        <div class="container-fluid">
-          <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </a>
-          <a class="brand" href="#">Records</a>
-          <div class="nav-collapse">
-            <ul class="nav">
-              <li><a href="#">Home</a></li>
-              <li class="active"><a href="#">Lists</a><li>
-              <li class="divider-vertical"></li>
-              <form class="navbar-search pull-right">
-                <input type="text" class="search-query" placeholder="Search">
-              </form>
-            </ul>
-          </div><!--/.nav-collapse -->
-        </div>
+  <div class="navbar navbar-fixed-top">
+    <div class="navbar-inner">
+      <div class="container-fluid">
+        <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </a>
+        <a class="brand" href="#">Records</a>
+        <div class="nav-collapse">
+          <ul class="nav">
+            <li><a href="#">Home</a></li>
+            <li class="active"><a href="#">Lists</a><li>
+            <li class="divider-vertical"></li>
+            <form class="navbar-search pull-right">
+              <input type="text" class="search-query" placeholder="Search">
+            </form>
+          </ul>
+        </div><!--/.nav-collapse -->
       </div>
     </div>
-    
-    <div class="container-fluid">
+  </div>
 
-      <script type="text/x-handlebars">
-      <div class="row-fluid">
-        <div class="span3 well">
-          <ul class="nav nav-list">
-            <li class="nav-header">
-              Lists
-            </li>
-            <li class="active">
-              <a href="#"><i class="icon-book"></i> Foo</a>
-            </li>
-          </ul>
-        </div>
-        
-        <div class="span9">
-          <div class="page-header">
-            <h1>{{Application.listName}}</h1>
-          </div>
-          <table class="table table-striped table-condensed">
-            <thead>
-              <tr>
-                <th><input type="checkbox"></input></th>
-                <th>Name</th>
-                <th>Web site</th>
-                <th>User Name</th>
-                <th>Password</th>
-              </tr>
-            </thead>
-            <tbody>
-              {{#each Application.accountsController}}
-              <tr>
-                <td><input type="checkbox"></input></td>
-                <td>{{name}} <span class="label label-info">New</span></td>
-                <td><a {{bindAttr href="url"}}>{{url}}</a></td>
-                <td>{{userName}}</td>
-                <td>{{password}}</td>
-              </tr>  
-              {{/each}}
-            </tbody>
-          </table>
-        </div>
+  <div class="container-fluid">
+
+    <script type="text/x-handlebars">
+    <div class="row-fluid">
+      <div class="span3 well">
+        <ul class="nav nav-list">
+          <li class="nav-header">
+            Lists
+          </li>
+          <li class="active">
+            <a href="#"><i class="icon-book"></i> Foo</a>
+          </li>
+        </ul>
       </div>
-      
-      <button class="btn btn-primary" {{ action "changeData" target="Application.accountsController" }}>Change</button>
-      </script>
-      
-      <hr>
-      
-      <footer>
-        <p>&copy; Company 2012</p>
-      </footer>
 
-    </div> <!-- /container -->
+      <div class="span9">
+        <div class="page-header">
+          <h1>{{Application.listName}}</h1>
+        </div>
+        <table class="table table-striped table-condensed">
+          <thead>
+            <tr>
+              <th><input type="checkbox"></input></th>
+              <th>Name</th>
+              <th>Web site</th>
+              <th>User Name</th>
+              <th>Password</th>
+            </tr>
+          </thead>
+          {{#collection contentBinding="Application.accountsController" tagName="tbody"}}
+            {{#view contentBinding="content"}}
+              <td><input type="checkbox"></input></td>
+              <td>{{content.name}}</td>
+              <td>{{content.url}}</td>
+              <td>{{content.username}}</td>
+              <td>{{content.password}}</td>        
+            {{/view}}
+          {{/collection}}
+        </table>
+      </div>
+    </div>
+
+    </script>
+
+    <hr />
+
+    <footer>
+      <p>&copy; Company 2012</p>
+    </footer>
+
+  </div> <!-- /container -->
+
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
 <script>window.jQuery || document.write('<script src="js/libs/jquery-1.7.2.min.js"><\/script>')</script>
 <script src="/js/libs/bootstrap/bootstrap.min.js"></script>
-<script src="http://cloud.github.com/downloads/emberjs/ember.js/ember-0.9.7.1.min.js"></script>
+<script src="http://cloud.github.com/downloads/emberjs/ember.js/ember-0.9.8.1.min.js"></script>
 
 <script src="/js/script.js"></script>
 <!-- <script>
