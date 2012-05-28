@@ -80,12 +80,12 @@
             </tr>
           </thead>
           {{#collection contentBinding="Application.accountsController" tagName="tbody"}}
-            {{#view contentBinding="content"}}
+            {{#view Application.ItemView contentBinding="content"}}
               <td><input type="checkbox"></input></td>
-              <td>{{content.name}}</td>
-              <td><a {{bindAttr href="content.url"}}>{{content.url}}</a></td>
-              <td>{{content.username}}</td>
-              <td>{{content.password}}</td>        
+              <td>{{name}}</td>
+              <td><a {{bindAttr href="url"}}>{{url}}</a></td>
+              <td>{{username}}</td>
+              <td>{{password}}</td>        
             {{/view}}
           {{/collection}}
         </table>

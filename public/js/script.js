@@ -34,7 +34,6 @@ Application.accountsController = Em.ArrayProxy.create({
     
     $.getJSON('/lists/passwords/all.json', function(data) {
       $(data).each(function(index, value) {
-        console.log(value);
         var account = me.createAccount(value);
       });
     });
@@ -50,5 +49,10 @@ Application.accountsController = Em.ArrayProxy.create({
 /*************************
  * Views
  *************************/
-
+Application.ItemView = Em.View.extend({
+  nameBinding: 'content.name',
+  urlBinding: 'content.url',
+  usernameBinding: 'content.username',
+  passwordBinding: 'content.password',
+});
 
