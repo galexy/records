@@ -3,7 +3,7 @@
 */
 
 Application = Em.Application.create({
-  listName: 'Accounts',
+  listName: 'Passwords',
   
   ready: function() {
     Application.accountsController.fill();
