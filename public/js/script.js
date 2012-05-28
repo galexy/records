@@ -32,7 +32,7 @@ Application.accountsController = Em.ArrayProxy.create({
   fill: function() {
     var me = this;
     
-    $.getJSON('/lists/password/all.json', function(data) {
+    $.getJSON('/lists/passwords/all.json', function(data) {
       $(data).each(function(index, value) {
         console.log(value);
         var account = me.createAccount(value);

@@ -83,7 +83,7 @@
             {{#view contentBinding="content"}}
               <td><input type="checkbox"></input></td>
               <td>{{content.name}}</td>
-              <td>{{content.url}}</td>
+              <td><a {{bindAttr href="content.url"}}>{{content.url}}</a></td>
               <td>{{content.username}}</td>
               <td>{{content.password}}</td>        
             {{/view}}
