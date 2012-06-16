@@ -27,119 +27,12 @@
 <body>
 <!--[if lt IE 7]><p class=chromeframe>Your browser is <em>ancient!</em> <a href="http://browsehappy.com/">Upgrade to a different browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">install Google Chrome Frame</a> to experience this site.</p><![endif]-->
 
-  <div class="navbar navbar-fixed-top">
-    <div class="navbar-inner">
-      <div class="container-fluid">
-        <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-        </a>
-        <a class="brand" href="#">Records</a>
-        <div class="nav-collapse">
-          <ul class="nav">
-            <li><a href="#">Home</a></li>
-            <li class="active"><a href="#">Lists</a><li>
-            <li class="divider-vertical"></li>
-            <form class="navbar-search pull-right">
-              <input type="text" class="search-query" placeholder="Search">
-            </form>
-          </ul>
-        </div><!--/.nav-collapse -->
-      </div>
-    </div>
-  </div>
+  <%- partial('navbar.ejs') %>
 
   <div class="container-fluid">
 
-    <script type="text/x-handlebars">
-    <div class="row-fluid">
-      <div class="span3 well">
-        <ul class="nav nav-list">
-          <li class="nav-header">Lists</li>
-          <li class="active"><a href="#"><i class="icon-book"></i> Passwords</a></li>
-        </ul>
-      </div>
-
-      {{#view Application.ListView class="span9"}}
-        <div class="page-header">
-          <div class="row-fluid">
-          <h1 class="pull-left span3 offset4">{{listName}}</h1>
-          <div class="btn-group span6">
-            <a class="btn" {{action "refresh"}}><i class="icon-refresh"></i></a>
-            <a class="btn" {{action "addItem"}}><i class="icon-plus-sign"></i></a>
-            <a class="btn disabled"><i class="icon-trash"></i></a>
-          </div>
-          </div>
-        </div>
-        <table class="table table-striped table-condensed">
-          <thead>
-            <tr>
-              <th><input type="checkbox"></input></th>
-              <th>Name</th>
-              <th>Web site</th>
-              <th>User Name</th>
-              <th>Password</th>
-            </tr>
-          </thead>
-          {{#collection contentBinding="Application.accountsController" tagName="tbody"}}
-            {{#view Application.ItemView contentBinding="content"}}
-              <td><input type="checkbox"></input></td>
-              <td>{{name}}</td>
-              <td><a {{bindAttr href="url"}}>{{url}}</a></td>
-              <td>{{username}}</td>
-              <td>{{password}}</td>        
-            {{/view}}
-          {{/collection}}
-        </table>
-      {{/view}}
-    </div>
-
-    {{#view Application.addItemView}}
-    <div class="modal hide fade" id="addItemModal">
-      <div class="modal-header">
-        <button class="close" data-dismiss="modal">×</button>
-        <h3>Add new item</h3>
-      </div>
-      <div class="modal-body">
-        <form class="form-horizontal">
-          <fieldset>
-            <div class="control-group">
-              <label class="control-label" for="input01">Name</label>
-              <div class="controls">
-                {{view Em.TextField valueBinding="account.name" classNames="input-xlarge" placeholder="Account Name"}}
-              </div>
-            </div>
-            <div class="control-group">
-              <label class="control-label" for="input01">Website</label>
-              <div class="controls">
-                {{view Em.TextField valueBinding="account.url" classNames="input-xlarge" placeholder="http://www.someplace.com"}}
-              </div>
-            </div>
-            <div class="control-group">
-              <label class="control-label" for="input01">Username</label>
-              <div class="controls">
-                {{view Em.TextField valueBinding="account.username" classNames="input-xlarge" placeholder="john@doe.com"}}
-                </div>
-            </div>
-            <div class="control-group">
-              <label class="control-label" for="input01">Password</label>
-              <div class="controls">
-                {{view Em.TextField valueBinding="account.password" classNames="input-xlarge" placeholder="password"}}
-              </div>
-            </div>
-          </fieldset>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <a href="#" class="btn btn-inverse" {{action "cancel"}}>Cancel</a>
-        <a href="#" class="btn btn-primary" class="submit" {{action "submit"}}>Add Item</a>
-      </div>
-    </div>
-    {{/view}}
-
-    </script>
-
+    <%- body %>
+    
     <hr />
 
   </div> <!-- /container -->
@@ -148,8 +41,8 @@
 <script>window.jQuery || document.write('<script src="js/libs/jquery-1.7.2.min.js"><\/script>')</script>
 <script src="/js/libs/bootstrap/bootstrap.min.js"></script>
 <script src="http://cloud.github.com/downloads/emberjs/ember.js/ember-0.9.8.1.min.js"></script>
+<script src="<%- script %>"></script>
 
-<script src="/js/script.js"></script>
 <!-- <script>
   var _gaq=[['_setAccount','UA-XXXXX-X'],['_trackPageview']];
   (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
