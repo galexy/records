@@ -56,23 +56,19 @@
     <div class="row-fluid">
       <div class="span3 well">
         <ul class="nav nav-list">
-          <li class="nav-header">
-            Lists
-          </li>
-          <li class="active">
-            <a href="#"><i class="icon-book"></i> Passwords</a>
-          </li>
+          <li class="nav-header">Lists</li>
+          <li class="active"><a href="#"><i class="icon-book"></i> Passwords</a></li>
         </ul>
       </div>
 
-      <div class="span9">
+      {{#view Application.ListView class="span9"}}
         <div class="page-header">
           <div class="row-fluid">
-          <h1 class="pull-left span3 offset4">{{Application.listName}}</h1>
+          <h1 class="pull-left span3 offset4">{{listName}}</h1>
           <div class="btn-group span6">
-            <button class="btn"><i class="icon-refresh"></i></button>
-            <button class="btn"><i class="icon-plus-sign"></i></button>
-            <button class="btn disabled"><i class="icon-trash"></i></button>
+            <a class="btn" {{action "refresh"}}><i class="icon-refresh"></i></a>
+            <a class="btn" {{action "addItem"}}><i class="icon-plus-sign"></i></a>
+            <a class="btn disabled"><i class="icon-trash"></i></a>
           </div>
           </div>
         </div>
@@ -96,8 +92,51 @@
             {{/view}}
           {{/collection}}
         </table>
+      {{/view}}
+    </div>
+
+    {{#view Application.addItemView}}
+    <div class="modal hide fade" id="addItemModal">
+      <div class="modal-header">
+        <button class="close" data-dismiss="modal">×</button>
+        <h3>Add new item</h3>
+      </div>
+      <div class="modal-body">
+        <form class="form-horizontal">
+          <fieldset>
+            <div class="control-group">
+              <label class="control-label" for="input01">Name</label>
+              <div class="controls">
+                {{view Em.TextField valueBinding="account.name" classNames="input-xlarge" placeholder="Account Name"}}
+              </div>
+            </div>
+            <div class="control-group">
+              <label class="control-label" for="input01">Website</label>
+              <div class="controls">
+                {{view Em.TextField valueBinding="account.url" classNames="input-xlarge" placeholder="http://www.someplace.com"}}
+              </div>
+            </div>
+            <div class="control-group">
+              <label class="control-label" for="input01">Username</label>
+              <div class="controls">
+                {{view Em.TextField valueBinding="account.username" classNames="input-xlarge" placeholder="john@doe.com"}}
+                </div>
+            </div>
+            <div class="control-group">
+              <label class="control-label" for="input01">Password</label>
+              <div class="controls">
+                {{view Em.TextField valueBinding="account.password" classNames="input-xlarge" placeholder="password"}}
+              </div>
+            </div>
+          </fieldset>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <a href="#" class="btn btn-inverse" {{action "cancel"}}>Cancel</a>
+        <a href="#" class="btn btn-primary" class="submit" {{action "submit"}}>Add Item</a>
       </div>
     </div>
+    {{/view}}
 
     </script>
 
