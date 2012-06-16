@@ -19,19 +19,22 @@
       <thead>
         <tr>
           <th><input type="checkbox"></input></th>
-          <th>Name</th>
-          <th>Web site</th>
-          <th>User Name</th>
-          <th>Password</th>
+          <% for (field in metadata) { %>
+            <th><%= metadata[field].heading %></th>
+          <% } %>
         </tr>
       </thead>
       {{#collection contentBinding="Application.accountsController" tagName="tbody"}}
         {{#view Application.ItemView contentBinding="content"}}
           <td><input type="checkbox"></input></td>
-          <td>{{name}}</td>
-          <td><a {{bindAttr href="url"}}>{{url}}</a></td>
-          <td>{{username}}</td>
-          <td>{{password}}</td>
+          <% for (fieldName in metadata) {
+            var field = metadata[fieldName];
+            switch(field.type) { case 'String': %>
+                <td>{{<%= fieldName %>}}</td>
+              <% break; case 'Url': %>
+                <td><a {{bindAttr href="<%= fieldName%>"}}>{{<%= fieldName%>}}</a></td>
+              <% break; %>
+          <% }} %>
         {{/view}}
       {{/collection}}
     </table>
