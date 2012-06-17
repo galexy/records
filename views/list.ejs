@@ -24,7 +24,7 @@
           <% } %>
         </tr>
       </thead>
-      {{#collection contentBinding="Application.accountsController" tagName="tbody"}}
+      {{#collection contentBinding="Application.passwordsController" tagName="tbody"}}
         {{#view Application.ItemView contentBinding="content"}}
           <td><input type="checkbox"></input></td>
           <% for (fieldName in metadata) {

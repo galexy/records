@@ -6,7 +6,7 @@ Application = Em.Application.create({
   listName: 'Passwords',
   
   ready: function() {
-    Application.accountsController.fill();
+    Application.passwordsController.fill();
     
     $('#addItemModal').modal();
     $('#addItemModal').on('hidden', function() {
@@ -19,7 +19,7 @@ Application = Em.Application.create({
  * Models
  **************************/
 
-Application.Account = Em.Object.extend({
+Application.Password = Em.Object.extend({
   name: '',
   url: '',
   username: '',
@@ -31,7 +31,7 @@ Application.Account = Em.Object.extend({
 /**************************
  * Array Controllers
  **************************/
-Application.accountsController = Em.ArrayProxy.create({
+Application.passwordsController = Em.ArrayProxy.create({
   content: [],
   
   fill: function() {
@@ -39,30 +39,30 @@ Application.accountsController = Em.ArrayProxy.create({
     
     $.getJSON('/lists/passwords/all.json', function(data) {
       $(data).each(function(index, value) {
-        var account = me.addItem(value);
+        var password = me.addItem(value);
       });
     });
   },
   
-  addItem: function(account) {
-    var newAccount = Application.Account.create(account);
-    this.pushObject(newAccount);
+  addItem: function(password) {
+    var newPassword = Application.Password.create(password);
+    this.pushObject(newPassword);
   },
 
-  postNewItem: function(account) {
+  postNewItem: function(password) {
     var me = this;
     
     $.ajax({
       url: '/lists/passwords', 
       type: 'POST',
       contentType: 'application/json',
-      data: JSON.stringify(account),
+      data: JSON.stringify(password),
       success: function(result, status, xhr) {
         var path = xhr.getResponseHeader('Location');
         var id = path.split('/').pop();
-        var newAccount = Application.Account.create(account);
-        newAccount.set('_id', id);
-        me.pushObject(newAccount);
+        var newPassword = Application.Password.create(password);
+        newPassword.set('_id', id);
+        me.pushObject(newPassword);
         
         Application.addItemView.hide();
       }
@@ -94,7 +94,7 @@ Application.ItemView = Em.View.extend({
 });
 
 Application.addItemView = Em.View.extend({
-  account: Application.Account.create(),
+  password: Application.Password.create(),
   
   hide: function() {
     this.clearInputs();
@@ -102,9 +102,9 @@ Application.addItemView = Em.View.extend({
   },
   
   change: function(event) {
-    var account = this.get('account');
+    var password = this.get('password');
     
-    if ('' != account.get('name') || '' != account.get('url') || '' != account.get('username') || '' != account.get('password'))
+    if ('' != password.get('name') || '' != password.get('url') || '' != password.get('username') || '' != password.get('password'))
       $('#addItemModal .submit').removeClass('disabled');
     else
       $('#addItemModal .submit').addClass('disabled');
@@ -115,14 +115,14 @@ Application.addItemView = Em.View.extend({
   },
   
   submit: function() {
-    Application.accountsController.postNewItem(this.get('account'));
+    Application.passwordsController.postNewItem(this.get('password'));
   },
   
   clearInputs: function() {
-    var account = this.get('account');
-    account.set('name', '');
-    account.set('url', '');
-    account.set('username', '');
-    account.set('password', '');
+    var password = this.get('password');
+    password.set('name', '');
+    password.set('url', '');
+    password.set('username', '');
+    password.set('password', '');
   }
 });
