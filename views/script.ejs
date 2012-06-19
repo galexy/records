@@ -1,0 +1,114 @@
+/* Author:
+
+*/
+
+Application = Em.Application.create({
+  listName: '<%= metadata.title %>',
+  
+  ready: function() {
+    Application.<%= metadata.name %>Controller.fill();
+    
+    $('#addNewItemModal').modal();
+    $('#addNewItemModal').on('hidden', function() {
+      Application.addNewItemModal.hide();
+    });
+  }
+});
+
+/**************************
+ * Models
+ **************************/
+
+Application.<%= metadata.className %> = Em.Object.extend({
+  <% for (field in metadata.fields) { %>
+  <%= field %>: '',
+  <% } %>
+});
+
+/**************************
+ * Array Controllers
+ **************************/
+Application.<%= metadata.name %>Controller = Em.ArrayProxy.create({
+  content: [],
+  
+  fill: function() {
+    var me = this;
+    
+    $.getJSON('/lists/<%= metadata.name %>/all.json', function(data) {
+      $(data).each(function(index, value) {
+        var item = me.addItem(value);
+      });
+    });
+  },
+  
+  addItem: function(item) {
+    var newItem = Application.<%= metadata.className %>.create(item);
+    this.pushObject(newItem);
+  },
+
+  postNewItem: function(item) {
+    var me = this;
+    
+    $.ajax({
+      url: '/lists/<%= metadata.name %>', 
+      type: 'POST',
+      contentType: 'application/json',
+      data: JSON.stringify(item),
+      success: function(result, status, xhr) {
+        var path = xhr.getResponseHeader('Location');
+        var id = path.split('/').pop();
+        var newItem = Application.<%= metadata.className %>.create(item);
+        newItem.set('_id', id);
+        me.pushObject(newItem);
+        
+        Application.addNewItemView.hide();
+      }
+    });
+  },
+});
+
+/*************************
+ * Views
+ *************************/
+Application.ListView = Em.View.extend({
+  listNameBinding: 'Application.listName',
+  
+  refresh: function(event) {
+    alert('refresh');
+  },
+  
+  addNewItem: function(event) {
+    $('#addNewItemModel input:first').focus();
+    $('#addNewItemModal').modal('show');
+  },
+});
+ 
+Application.ItemView = Em.View.extend({
+  <% for (field in metadata.fields) { %>
+  <%=field%>Binding: 'content.<%=field%>',
+  <% } %>
+});
+
+Application.addNewItemView = Em.View.extend({
+  newItem: Application.<%= metadata.className %>.create(),
+  
+  hide: function() {
+    this.clearInputs();
+    $('#addNewItemModal').modal('hide');
+  },
+  
+  cancel: function() {
+    this.hide();
+  },
+  
+  submit: function() {
+    Application.<%= metadata.name %>Controller.postNewItem(this.get('newItem'));
+  },
+  
+  clearInputs: function() {
+    var newItem = this.get('newItem');
+    <% for (field in metadata.fields) { %>
+    newItem.set('<%= field %>', '');
+    <% } %>
+  }
+});

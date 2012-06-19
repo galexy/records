@@ -25,29 +25,75 @@ app.configure(function() {
   app.use(express.static(__dirname + '/public'));
 });
 
-app.set('view engine', 'ejs');
+app.set('view engine', 'ejs')
 
-app.get('/lists/:list', function(req, res) {
-    res.render('list', { title: req.params.list });
-});
-
-app.get('/lists/:list/metadata.json', function(req, res) {
+function loadMetadata(req, res, next) {
+  req.metadata = {
+    title: 'Passwords',
+    name: 'passwords',
+    single: 'password',
+    className: 'Password',
+    
+    fields: {
+      name: {
+        heading: 'Name',
+        placeholder: 'Account Name',
+        type: 'String',
+        required: true,
+      },
+    
+      url: {
+        heading: 'Website',
+        placeholder: 'http://www.someplace.com',
+        type: 'Url',
+        required: true,
+      },
+    
+      username: {
+        heading: 'User Name',
+        placeholder: 'john@doe.com',
+        type: 'String',
+        required: false,
+      },
+    
+      password: {
+        heading: 'Password',
+        placeholder: 'password',
+        type: 'String',
+        required: false,
+      }
+    }
+  };
   
-});
+  next();
+}
+
+app.get('/lists/:list', loadMetadata, function(req, res) {
+  res.render('list', { list: req.params.list, metadata: req.metadata });
+})
+
+app.get('/lists/:list/metadata.json', loadMetadata, function(req, res) {
+  res.send(req.metadata, 200);
+})
+
+app.get('/lists/:list/script.js', loadMetadata, function(req, res) {
+  res.render('script', { layout: false, list: req.params.list, metadata: req.metadata });
+})
 
 app.get('/lists/:list/all.json', function(req, res) {
   db.collection(req.params.list, function(err, collection) {
     var stream = collection.find().stream();
     var list = [];
+
     stream.on('close', function() {
       res.send(list, { 'Content-Type': 'application/json'}, 200);
-    });
+    })
     
     stream.on('data', function(data) {
       list.push(data);
-    });
-  });
-});
+    })
+  })
+})
 
 app.post('/lists/:list', function(req, res) {
   console.log('posting to list: ' + req.params.list);
