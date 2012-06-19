@@ -31,21 +31,25 @@ function loadMetadata(req, res, next) {
   req.metadata = {
     name: {
       heading: 'Name',
+      placeholder: 'Account Name',
       type: 'String'
     },
     
     url: {
       heading: 'Website',
+      placeholder: 'http://www.someplace.com',
       type: 'Url'
     },
     
     username: {
       heading: 'User Name',
+      placeholder: 'john@doe.com',
       type: 'String'
     },
     
     password: {
       heading: 'Password',
+      placeholder: 'password',
       type: 'String'
     }
   };
