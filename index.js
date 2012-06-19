@@ -30,30 +30,37 @@ app.set('view engine', 'ejs')
 function loadMetadata(req, res, next) {
   req.metadata = {
     title: 'Passwords',
+    name: 'passwords',
+    single: 'password',
+    className: 'Password',
     
     fields: {
       name: {
         heading: 'Name',
         placeholder: 'Account Name',
-        type: 'String'
+        type: 'String',
+        required: true,
       },
     
       url: {
         heading: 'Website',
         placeholder: 'http://www.someplace.com',
-        type: 'Url'
+        type: 'Url',
+        required: true,
       },
     
       username: {
         heading: 'User Name',
         placeholder: 'john@doe.com',
-        type: 'String'
+        type: 'String',
+        required: false,
       },
     
       password: {
         heading: 'Password',
         placeholder: 'password',
-        type: 'String'
+        type: 'String',
+        required: false,
       }
     }
   };
@@ -69,8 +76,8 @@ app.get('/lists/:list/metadata.json', loadMetadata, function(req, res) {
   res.send(req.metadata, 200);
 })
 
-app.get('/lists/:list/script.js', function(req, res) {
-  res.render('script', { layout: false, list: req.params.list });
+app.get('/lists/:list/script.js', loadMetadata, function(req, res) {
+  res.render('script', { layout: false, list: req.params.list, metadata: req.metadata });
 })
 
 app.get('/lists/:list/all.json', function(req, res) {

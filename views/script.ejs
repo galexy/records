@@ -3,14 +3,14 @@
 */
 
 Application = Em.Application.create({
-  listName: 'Passwords',
+  listName: '<%= metadata.title %>',
   
   ready: function() {
-    Application.passwordsController.fill();
+    Application.<%= metadata.name %>Controller.fill();
     
-    $('#addItemModal').modal();
-    $('#addItemModal').on('hidden', function() {
-      Application.addItemModal.hide();
+    $('#addNewItemModal').modal();
+    $('#addNewItemModal').on('hidden', function() {
+      Application.addNewItemModal.hide();
     });
   }
 });
@@ -19,52 +19,49 @@ Application = Em.Application.create({
  * Models
  **************************/
 
-Application.Password = Em.Object.extend({
-  name: '',
-  url: '',
-  username: '',
-  password: '',
-  securityQuestion: '',
-  securityAnswer: ''
+Application.<%= metadata.className %> = Em.Object.extend({
+  <% for (field in metadata.fields) { %>
+  <%= field %>: '',
+  <% } %>
 });
 
 /**************************
  * Array Controllers
  **************************/
-Application.passwordsController = Em.ArrayProxy.create({
+Application.<%= metadata.name %>Controller = Em.ArrayProxy.create({
   content: [],
   
   fill: function() {
     var me = this;
     
-    $.getJSON('/lists/passwords/all.json', function(data) {
+    $.getJSON('/lists/<%= metadata.name %>/all.json', function(data) {
       $(data).each(function(index, value) {
-        var password = me.addItem(value);
+        var item = me.addItem(value);
       });
     });
   },
   
-  addItem: function(password) {
-    var newPassword = Application.Password.create(password);
-    this.pushObject(newPassword);
+  addItem: function(item) {
+    var newItem = Application.<%= metadata.className %>.create(item);
+    this.pushObject(newItem);
   },
 
-  postNewItem: function(password) {
+  postNewItem: function(item) {
     var me = this;
     
     $.ajax({
-      url: '/lists/passwords', 
+      url: '/lists/<%= metadata.name %>', 
       type: 'POST',
       contentType: 'application/json',
-      data: JSON.stringify(password),
+      data: JSON.stringify(item),
       success: function(result, status, xhr) {
         var path = xhr.getResponseHeader('Location');
         var id = path.split('/').pop();
-        var newPassword = Application.Password.create(password);
-        newPassword.set('_id', id);
-        me.pushObject(newPassword);
+        var newItem = Application.<%= metadata.className %>.create(item);
+        newItem.set('_id', id);
+        me.pushObject(newItem);
         
-        Application.addItemView.hide();
+        Application.addNewItemView.hide();
       }
     });
   },
@@ -80,34 +77,24 @@ Application.ListView = Em.View.extend({
     alert('refresh');
   },
   
-  addItem: function(event) {
-    $('#addItemModel input:first').focus();
-    $('#addItemModal').modal('show');
+  addNewItem: function(event) {
+    $('#addNewItemModel input:first').focus();
+    $('#addNewItemModal').modal('show');
   },
-}); 
+});
  
 Application.ItemView = Em.View.extend({
-  nameBinding: 'content.name',
-  urlBinding: 'content.url',
-  usernameBinding: 'content.username',
-  passwordBinding: 'content.password',
+  <% for (field in metadata.fields) { %>
+  <%=field%>Binding: 'content.<%=field%>',
+  <% } %>
 });
 
-Application.addItemView = Em.View.extend({
-  newItem: Application.Password.create(),
+Application.addNewItemView = Em.View.extend({
+  newItem: Application.<%= metadata.className %>.create(),
   
   hide: function() {
     this.clearInputs();
-    $('#addItemModal').modal('hide');
-  },
-  
-  change: function(event) {
-    var password = this.get('password');
-    
-    if ('' != password.get('name') || '' != password.get('url') || '' != password.get('username') || '' != password.get('password'))
-      $('#addItemModal .submit').removeClass('disabled');
-    else
-      $('#addItemModal .submit').addClass('disabled');
+    $('#addNewItemModal').modal('hide');
   },
   
   cancel: function() {
@@ -115,14 +102,13 @@ Application.addItemView = Em.View.extend({
   },
   
   submit: function() {
-    Application.passwordsController.postNewItem(this.get('password'));
+    Application.<%= metadata.name %>Controller.postNewItem(this.get('newItem'));
   },
   
   clearInputs: function() {
-    var password = this.get('password');
-    password.set('name', '');
-    password.set('url', '');
-    password.set('username', '');
-    password.set('password', '');
+    var newItem = this.get('newItem');
+    <% for (field in metadata.fields) { %>
+    newItem.set('<%= field %>', '');
+    <% } %>
   }
 });
