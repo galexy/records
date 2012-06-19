@@ -7,11 +7,11 @@
   <div class="modal-body">
     <form class="form-horizontal">
       <fieldset>
-        <% for (field in metadata) { %>
+        <% for (field in metadata.fields) { %>
         <div class="control-group">
-            <label class="control-label" for="input01"><%= metadata[field].heading %></label>
+            <label class="control-label" for="input01"><%= metadata.fields[field].heading %></label>
             <div class="controls">
-              {{view Em.TextField valueBinding="newItem.<%= field %>" classNames="input-xlarge" placeholder="<%= metadata[field].placeholder %>"}}
+              {{view Em.TextField valueBinding="newItem.<%= field %>" classNames="input-xlarge" placeholder="<%= metadata.fields[field].placeholder %>"}}
             </div>
         </div>
         <% } %>

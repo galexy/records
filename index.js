@@ -29,28 +29,32 @@ app.set('view engine', 'ejs')
 
 function loadMetadata(req, res, next) {
   req.metadata = {
-    name: {
-      heading: 'Name',
-      placeholder: 'Account Name',
-      type: 'String'
-    },
+    title: 'Passwords',
     
-    url: {
-      heading: 'Website',
-      placeholder: 'http://www.someplace.com',
-      type: 'Url'
-    },
+    fields: {
+      name: {
+        heading: 'Name',
+        placeholder: 'Account Name',
+        type: 'String'
+      },
     
-    username: {
-      heading: 'User Name',
-      placeholder: 'john@doe.com',
-      type: 'String'
-    },
+      url: {
+        heading: 'Website',
+        placeholder: 'http://www.someplace.com',
+        type: 'Url'
+      },
     
-    password: {
-      heading: 'Password',
-      placeholder: 'password',
-      type: 'String'
+      username: {
+        heading: 'User Name',
+        placeholder: 'john@doe.com',
+        type: 'String'
+      },
+    
+      password: {
+        heading: 'Password',
+        placeholder: 'password',
+        type: 'String'
+      }
     }
   };
   

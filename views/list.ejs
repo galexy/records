@@ -19,16 +19,16 @@
       <thead>
         <tr>
           <th><input type="checkbox"></input></th>
-          <% for (field in metadata) { %>
-            <th><%= metadata[field].heading %></th>
+          <% for (field in metadata.fields) { %>
+            <th><%= metadata.fields[field].heading %></th>
           <% } %>
         </tr>
       </thead>
       {{#collection contentBinding="Application.passwordsController" tagName="tbody"}}
         {{#view Application.ItemView contentBinding="content"}}
           <td><input type="checkbox"></input></td>
-          <% for (fieldName in metadata) {
-            var field = metadata[fieldName];
+          <% for (fieldName in metadata.fields) {
+            var field = metadata.fields[fieldName];
             switch(field.type) { case 'String': %>
                 <td>{{<%= fieldName %>}}</td>
               <% break; case 'Url': %>
