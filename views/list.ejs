@@ -1,18 +1,17 @@
 <% script = '/lists/passwords/script.js' %>
 
-<script type="text/x-handlebars">
-<div class="row-fluid">
+<div id="listview" class="row-fluid">
   <%- partial('sidenav.ejs') %>
 
-  {{#view Application.ListView class="span9"}}
+  <div class="span9">
     <div class="page-header">
       <div class="row-fluid">
-      <h1 class="pull-left span3 offset4">{{listName}}</h1>
-      <div class="btn-group span6">
-        <a class="btn" {{action "refresh"}}><i class="icon-refresh"></i></a>
-        <a class="btn" {{action "addNewItem"}}><i class="icon-plus-sign"></i></a>
-        <a class="btn disabled"><i class="icon-trash"></i></a>
-      </div>
+        <h1 id="title" class="pull-left span3 offset4"><%= metadata.title %></h1>
+        <div class="btn-group span6">
+          <btn class="btn" id="refresh"><i class="icon-refresh"></i></btn>
+          <btn class="btn" id="addItem"><i class="icon-plus-sign"></i></btn>
+          <btn class="btn disabled" id="delete" disabled="disabled"><i class="icon-trash"></i></btn>
+        </div>
       </div>
     </div>
     <table class="table table-striped table-condensed">
@@ -24,23 +23,22 @@
           <% } %>
         </tr>
       </thead>
-      {{#collection contentBinding="Application.passwordsController" tagName="tbody"}}
-        {{#view Application.ItemView contentBinding="content"}}
-          <td><input type="checkbox"></input></td>
-          <% for (fieldName in metadata.fields) {
-            var field = metadata.fields[fieldName];
-            switch(field.type) { case 'String': %>
-                <td>{{<%= fieldName %>}}</td>
-              <% break; case 'Url': %>
-                <td><a {{bindAttr href="<%= fieldName%>"}}>{{<%= fieldName%>}}</a></td>
-              <% break; %>
-          <% }} %>
-        {{/view}}
-      {{/collection}}
+      <tbody>
+      </tbody>
     </table>
-  {{/view}}
+  </div>
 </div>
 
-<%- partial('newItemModal.ejs') %>
-
+<script type="template" id="listItemTemplate">
+  <td><input type="checkbox"></input></td>
+  <% for (fieldName in metadata.fields) {
+    var field = metadata.fields[fieldName];
+    switch(field.type) { case 'String': %>
+        <td>{{<%= fieldName %>}}</td>
+      <% break; case 'Url': %>
+        <td><a {{bindAttr href="<%= fieldName%>"}}>{{<%= fieldName%>}}</a></td>
+      <% break; %>
+  <% }} %>
 </script>
+
+<!-- <%- partial('newItemModal.ejs') %> -->

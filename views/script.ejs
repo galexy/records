@@ -2,113 +2,111 @@
 
 */
 
-Application = Em.Application.create({
-  listName: '<%= metadata.title %>',
-  
-  ready: function() {
-    Application.<%= metadata.name %>Controller.fill();
+$(function() {
+
+  /**************************
+   * Models
+   **************************/
+
+  var <%= metadata.className %> = Backbone.Model.extend({
     
-    $('#addNewItemModal').modal();
-    $('#addNewItemModal').on('hidden', function() {
-      Application.addNewItemModal.hide();
-    });
-  }
-});
-
-/**************************
- * Models
- **************************/
-
-Application.<%= metadata.className %> = Em.Object.extend({
-  <% for (field in metadata.fields) { %>
-  <%= field %>: '',
-  <% } %>
-});
-
-/**************************
- * Array Controllers
- **************************/
-Application.<%= metadata.name %>Controller = Em.ArrayProxy.create({
-  content: [],
-  
-  fill: function() {
-    var me = this;
-    
-    $.getJSON('/lists/<%= metadata.name %>/all.json', function(data) {
-      $(data).each(function(index, value) {
-        var item = me.addItem(value);
-      });
-    });
-  },
-  
-  addItem: function(item) {
-    var newItem = Application.<%= metadata.className %>.create(item);
-    this.pushObject(newItem);
-  },
-
-  postNewItem: function(item) {
-    var me = this;
-    
-    $.ajax({
-      url: '/lists/<%= metadata.name %>', 
-      type: 'POST',
-      contentType: 'application/json',
-      data: JSON.stringify(item),
-      success: function(result, status, xhr) {
-        var path = xhr.getResponseHeader('Location');
-        var id = path.split('/').pop();
-        var newItem = Application.<%= metadata.className %>.create(item);
-        newItem.set('_id', id);
-        me.pushObject(newItem);
-        
-        Application.addNewItemView.hide();
+    defaults: function() {
+      return {
+        <% for (field in metadata.fields) { %>
+        <%= field %>: '',
+        <% } %>
       }
-    });
-  },
-});
+    },
 
-/*************************
- * Views
- *************************/
-Application.ListView = Em.View.extend({
-  listNameBinding: 'Application.listName',
-  
-  refresh: function(event) {
-    alert('refresh');
-  },
-  
-  addNewItem: function(event) {
-    $('#addNewItemModel input:first').focus();
-    $('#addNewItemModal').modal('show');
-  },
-});
- 
-Application.ItemView = Em.View.extend({
-  <% for (field in metadata.fields) { %>
-  <%=field%>Binding: 'content.<%=field%>',
-  <% } %>
-});
+    initialize: function() {
+      // nothing for now
+    }
+  });
 
-Application.addNewItemView = Em.View.extend({
-  newItem: Application.<%= metadata.className %>.create(),
+  var <%= metadata.name%>List = Backbone.Collection.extend({
+    
+    model: <%= metadata.className %>,
+    
+    url: '/lists.json/<%= metadata.name %>',
+    
+  });
   
-  hide: function() {
-    this.clearInputs();
-    $('#addNewItemModal').modal('hide');
-  },
+  var <%= metadata.name %> = new <%= metadata.name %>List;
   
-  cancel: function() {
-    this.hide();
-  },
+  var <%= metadata.className %>View = Backbone.View.extend({
+    
+    tagName: 'tr',
+    
+    template: $('#listItemTemplate').text(),
+    
+    events: {
+      
+    },
+    
+    initialize: function() {
+      this.model.bind('change', this.render, this);
+      this.model.bind('destroy', this.remove, this);
+    },
+    
+    render: function() {
+      this.$el.html(Mustache.render(this.template, this.model.toJSON()));
+      return this;
+    },
+    
+  });
   
-  submit: function() {
-    Application.<%= metadata.name %>Controller.postNewItem(this.get('newItem'));
-  },
+
+  var AppView = Backbone.View.extend({
+    el: $('#listview'),
+    
+    events: {
+      'click #refresh'  : 'refresh',
+      'click #addItem'  : 'addNewItem',
+      'click #delete'   : 'delete',
+    },
+    
+    initialize: function() {
+
+      this.table = this.$('tbody');
+
+      // bind model events
+      <%= metadata.name %>.bind('add', this.addOne, this);
+      <%= metadata.name %>.bind('reset', this.addAll, this);
+      <%= metadata.name %>.bind('all', this.render, this);
+
+      <%= metadata.name %>.fetch();
+    },
+    
+    render: function() {
+      return this;
+    },
+    
+    refresh: function(e) {
+      
+    },
+    
+    addNewItem: function(e) {
+      
+    },
+    
+    delete: function(e) {
+      
+    },
+    
+    addOne: function(item) {
+      var view = new <%= metadata.className %>View({
+        model: item
+      });
+      this.table.append(view.render().el);
+    },
+    
+    addAll: function() {
+      <%= metadata.name %>.each($.proxy(this.addOne, this));
+    },
+    
+    
+  });
   
-  clearInputs: function() {
-    var newItem = this.get('newItem');
-    <% for (field in metadata.fields) { %>
-    newItem.set('<%= field %>', '');
-    <% } %>
-  }
-});
+  var App = new AppView;
+  
+}) 
