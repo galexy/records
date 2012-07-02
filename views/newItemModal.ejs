@@ -1,17 +1,17 @@
-{{#view Application.addNewItemView}}
-<div class="modal hide fade" id="addNewItemModal">
+
+<div class="modal hide fade" id="newItemModal">
   <div class="modal-header">
     <button class="close" data-dismiss="modal">×</button>
     <h3>Add new item</h3>
   </div>
   <div class="modal-body">
-    <form class="form-horizontal">
+    <form class="form-horizontal well">
       <fieldset>
         <% for (field in metadata.fields) { %>
         <div class="control-group">
             <label class="control-label" for="input01"><%= metadata.fields[field].heading %></label>
             <div class="controls">
-              {{view Em.TextField valueBinding="newItem.<%= field %>" classNames="input-xlarge" placeholder="<%= metadata.fields[field].placeholder %>"}}
+              <input name="<%= field %>" type="text" class="input-xlarge" placeholder="<%= metadata.fields[field].placeholder %>"></input>
             </div>
         </div>
         <% } %>
@@ -19,8 +19,7 @@
     </form>
   </div>
   <div class="modal-footer">
-    <a href="#" class="btn btn-inverse" {{action "cancel"}}>Cancel</a>
-    <a href="#" class="btn btn-primary" class="submit disabled" {{action "submit"}}>Add Item</a>
+    <a href="#" id="addItemCancel" class="btn btn-inverse">Cancel</a>
+    <a href="#" id="addItemSubmit" class="btn btn-primary" class="submit">Add Item</a>
   </div>
 </div>
-{{/view}}
