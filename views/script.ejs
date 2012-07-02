@@ -64,6 +64,7 @@ $(function() {
       'click #addItemCancel'  : 'cancel',
       'click #addItemSubmit'  : 'submit',
       'shown'                 : 'shown',
+      'hide'                  : 'hide',
     },
     
     initialize: function() {
@@ -88,12 +89,17 @@ $(function() {
       this.$('input').first().focus();
     },
     
+    hide: function() {
+      this.model.set(this.model.defaults());
+    },
+    
     cancel: function(e) {
       this.$el.modal('hide');
     },
     
     submit: function(e) {
       <%= metadata.name %>.create(this.model.toJSON());
+      this.$el.modal('hide');
     },
   });  
 
