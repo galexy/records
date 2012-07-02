@@ -17,6 +17,8 @@ $(function() {
         <% } %>
       }
     },
+    
+    idAttribute: '_id',
 
     initialize: function() {
       // nothing for now
@@ -65,6 +67,9 @@ $(function() {
     
     initialize: function() {
       this._modelBinder = new Backbone.ModelBinder();
+      this.$el.on('shown', $.proxy(function() {
+        this.$('input').first().focus();
+      }, this));
       
       this.render();
     },
