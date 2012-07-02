@@ -19,7 +19,7 @@ var db = new Db('records', server);
 
 var app = express.createServer();
 
-app.configure(function() {
+app.configure(function () {
   app.use(express.logger());
   app.use(express.bodyParser());
   app.use(express.static(__dirname + '/public'));
@@ -72,15 +72,15 @@ app.get('/lists/:list', loadMetadata, function(req, res) {
   res.render('list', { list: req.params.list, metadata: req.metadata });
 })
 
-app.get('/lists/:list/metadata.json', loadMetadata, function(req, res) {
-  res.send(req.metadata, 200);
-})
-
 app.get('/lists/:list/script.js', loadMetadata, function(req, res) {
   res.render('script', { layout: false, list: req.params.list, metadata: req.metadata });
 })
 
-app.get('/lists/:list/all.json', function(req, res) {
+app.get('/lists.json/:list/metadata', loadMetadata, function(req, res) {
+  res.send(req.metadata, 200);
+})
+
+app.get('/lists.json/:list', function(req, res) {
   db.collection(req.params.list, function(err, collection) {
     var stream = collection.find().stream();
     var list = [];
@@ -95,7 +95,7 @@ app.get('/lists/:list/all.json', function(req, res) {
   })
 })
 
-app.post('/lists/:list', function(req, res) {
+app.post('/lists.json/:list', function(req, res) {
   console.log('posting to list: ' + req.params.list);
   
   if (!req.is('application/json')) {
@@ -114,7 +114,7 @@ app.post('/lists/:list', function(req, res) {
   });
 });
 
-app.get('/lists/:list/:item.json', function(req, res) {
+app.get('/lists.json/:list/:item', function(req, res) {
   db.collection(req.params.list, function(err, collection) {
     if (err) {
       return res.send(500);
@@ -134,7 +134,7 @@ app.get('/lists/:list/:item.json', function(req, res) {
   });
 });
 
-app.put('/lists/:list/:item.json', function(req, res) {
+app.put('/lists.json/:list/:item', function(req, res) {
   if (!req.is('application/json')) {
     return res.send(400);
   }
