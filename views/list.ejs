@@ -27,18 +27,20 @@
       </tbody>
     </table>
   </div>
+  
+  <script type="template" id="listItemTemplate">
+    <td><input type="checkbox"></input></td>
+    <% for (fieldName in metadata.fields) {
+      var field = metadata.fields[fieldName];
+      switch(field.type) { case 'String': %>
+          <td>{{<%= fieldName %>}}</td>
+        <% break; case 'Url': %>
+          <td><a href="{{<%= fieldName%>}}">{{<%= fieldName%>}}</a></td>
+        <% break; %>
+    <% }} %>
+  </script>
+  
 </div>
 
-<script type="template" id="listItemTemplate">
-  <td><input type="checkbox"></input></td>
-  <% for (fieldName in metadata.fields) {
-    var field = metadata.fields[fieldName];
-    switch(field.type) { case 'String': %>
-        <td>{{<%= fieldName %>}}</td>
-      <% break; case 'Url': %>
-        <td><a href="{{<%= fieldName%>}}">{{<%= fieldName%>}}</a></td>
-      <% break; %>
-  <% }} %>
-</script>
 
 <!-- <%- partial('newItemModal.ejs') %> -->
