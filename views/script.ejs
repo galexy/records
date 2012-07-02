@@ -63,13 +63,11 @@ $(function() {
     events: {
       'click #addItemCancel'  : 'cancel',
       'click #addItemSubmit'  : 'submit',
+      'shown'                 : 'shown',
     },
     
     initialize: function() {
       this._modelBinder = new Backbone.ModelBinder();
-      this.$el.on('shown', $.proxy(function() {
-        this.$('input').first().focus();
-      }, this));
       
       this.render();
     },
@@ -84,6 +82,10 @@ $(function() {
     
     show: function() {
       this.$el.modal('show');
+    },
+    
+    shown: function() {
+      this.$('input').first().focus();
     },
     
     cancel: function(e) {
