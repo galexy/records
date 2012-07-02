@@ -19,7 +19,7 @@ var db = new Db('records', server);
 
 var app = express.createServer();
 
-app.configure(function() {
+app.configure(function () {
   app.use(express.logger());
   app.use(express.bodyParser());
   app.use(express.static(__dirname + '/public'));

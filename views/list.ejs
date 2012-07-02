@@ -1,46 +1,47 @@
 <% script = '/lists/passwords/script.js' %>
 
-<div id="listview" class="row-fluid">
-  <%- partial('sidenav.ejs') %>
+<div id="listview">
+  <div class="row-fluid">
+    <%- partial('sidenav.ejs') %>
 
-  <div class="span9">
-    <div class="page-header">
-      <div class="row-fluid">
-        <h1 id="title" class="pull-left span3 offset4"><%= metadata.title %></h1>
-        <div class="btn-group span6">
-          <btn class="btn" id="refresh"><i class="icon-refresh"></i></btn>
-          <btn class="btn" id="addItem"><i class="icon-plus-sign"></i></btn>
-          <btn class="btn disabled" id="delete" disabled="disabled"><i class="icon-trash"></i></btn>
+    <div class="span9">
+      <div class="page-header">
+        <div class="row-fluid">
+          <h1 id="title" class="pull-left span3 offset4"><%= metadata.title %></h1>
+          <div class="btn-group span6">
+            <btn class="btn" id="refresh"><i class="icon-refresh"></i></btn>
+            <btn class="btn" id="addItem"><i class="icon-plus-sign"></i></btn>
+            <btn class="btn disabled" id="delete" disabled="disabled"><i class="icon-trash"></i></btn>
+          </div>
         </div>
       </div>
+      <table class="table table-striped table-condensed">
+        <thead>
+          <tr>
+            <th><input type="checkbox"></input></th>
+            <% for (field in metadata.fields) { %>
+              <th><%= metadata.fields[field].heading %></th>
+            <% } %>
+          </tr>
+        </thead>
+        <tbody>
+        </tbody>
+      </table>
     </div>
-    <table class="table table-striped table-condensed">
-      <thead>
-        <tr>
-          <th><input type="checkbox"></input></th>
-          <% for (field in metadata.fields) { %>
-            <th><%= metadata.fields[field].heading %></th>
-          <% } %>
-        </tr>
-      </thead>
-      <tbody>
-      </tbody>
-    </table>
+  
+    <script type="template" id="listItemTemplate">
+      <td><input type="checkbox"></input></td>
+      <% for (fieldName in metadata.fields) {
+        var field = metadata.fields[fieldName];
+        switch(field.type) { case 'String': %>
+            <td>{{<%= fieldName %>}}</td>
+          <% break; case 'Url': %>
+            <td><a href="{{<%= fieldName%>}}">{{<%= fieldName%>}}</a></td>
+          <% break; %>
+      <% }} %>
+    </script>
+  
   </div>
-  
-  <script type="template" id="listItemTemplate">
-    <td><input type="checkbox"></input></td>
-    <% for (fieldName in metadata.fields) {
-      var field = metadata.fields[fieldName];
-      switch(field.type) { case 'String': %>
-          <td>{{<%= fieldName %>}}</td>
-        <% break; case 'Url': %>
-          <td><a href="{{<%= fieldName%>}}">{{<%= fieldName%>}}</a></td>
-        <% break; %>
-    <% }} %>
-  </script>
-  
+
+  <%- partial('newItemModal.ejs') %>
 </div>
-
-
-<!-- <%- partial('newItemModal.ejs') %> -->
