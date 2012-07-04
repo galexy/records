@@ -63,6 +63,7 @@ $(function() {
     events: {
       'click #addItemCancel'  : 'cancel',
       'click #addItemSubmit'  : 'submit',
+      'submit #newItemForm'   : 'submit',
       'shown'                 : 'shown',
       'hide'                  : 'hide',
     },
@@ -98,6 +99,7 @@ $(function() {
     },
     
     submit: function(e) {
+      e.preventDefault();
       <%= metadata.name %>.create(this.model.toJSON());
       this.$el.modal('hide');
     },

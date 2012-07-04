@@ -5,7 +5,7 @@
     <h3>Add new item</h3>
   </div>
   <div class="modal-body">
-    <form class="form-horizontal well">
+    <form class="form-horizontal well" id="newItemForm">
       <fieldset>
         <% for (field in metadata.fields) { %>
         <div class="control-group">
@@ -15,6 +15,7 @@
             </div>
         </div>
         <% } %>
+        <input type="submit" style="visibility:hidden;"></input>
       </fieldset>
     </form>
   </div>
