@@ -98,46 +98,57 @@ app.get('/lists.json/:list', function(req, res) {
 app.post('/lists.json/:list', function(req, res) {
   console.log('posting to list: ' + req.params.list);
   
-  if (!req.is('application/json')) {
+  if (!req.is('application/json'))
     return res.send(400);
-  }
   
   db.collection(req.params.list, function(err, collection) {
     collection.insert(req.body, {safe: true}, function(err, result) {
-      if (err) {
+      if (err)
         return res.send(500);
-      }
       
       res.header('Location', '/lists/' + req.params.list + '/' + result[0]._id);
-      return res.send(201);
+      return res.send(result[0], { 'Content-Type': 'application/json' }, 201);
     });
   });
 });
 
 app.get('/lists.json/:list/:item', function(req, res) {
   db.collection(req.params.list, function(err, collection) {
-    if (err) {
+    if (err)
       return res.send(500);
-    }
     
     collection.findOne({_id: new ObjectID(req.params.item)}, function(err, doc) {
-      if (err) {
+      if (err)
         return res.send(500);
-      }
       
-      if (!doc) {
+      if (!doc)
         return res.send(404);
-      }
       
       res.send(doc, { 'Content-Type': 'application/json'}, 200);
     });
   });
 });
 
+app.delete('/lists.json/:list/:item', function(req, res) {
+  db.collection(req.params.list, function(err, collection) {
+    if (err)
+      return res.send(500);
+      
+    collection.remove({_id: new ObjectID(req.params.item)}, function(err, count) {
+      if (err)
+        return res.send(500);
+        
+      if (0 == count)
+        return res.send(404);
+        
+      return res.send({});
+    })
+  })
+})
+
 app.put('/lists.json/:list/:item', function(req, res) {
-  if (!req.is('application/json')) {
+  if (!req.is('application/json'))
     return res.send(400);
-  }
   
   db.collection(req.params.list, function(err, collection) {
     console.log('Updating ' + req.params.item + ' with ');

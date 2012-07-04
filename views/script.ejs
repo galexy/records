@@ -21,7 +21,8 @@ $(function() {
     idAttribute: '_id',
 
     initialize: function() {
-      // nothing for now
+      var selectable = new Backbone.Picky.Selectable(this);
+      _.extend(this, selectable);
     }
   });
 
@@ -31,6 +32,11 @@ $(function() {
     
     url: '/lists.json/<%= metadata.name %>',
     
+    initialize: function() {
+      var multiSelect = new Backbone.Picky.MultiSelect(this);
+      _.extend(this, multiSelect);
+    }
+
   });
   
   var <%= metadata.name %> = new <%= metadata.name %>List;
@@ -42,12 +48,14 @@ $(function() {
     template: $('#listItemTemplate').text(),
     
     events: {
-      
+      'click input[type="checkbox"].selector' : 'select',
     },
     
     initialize: function() {
       this.model.bind('change', this.render, this);
       this.model.bind('destroy', this.remove, this);
+      this.model.bind('selected', this.selected, this);
+      this.model.bind('deselected', this.deselected, this);
     },
     
     render: function() {
@@ -55,6 +63,17 @@ $(function() {
       return this;
     },
     
+    select: function() {
+      this.model.toggleSelected();
+    },
+    
+    selected: function(e) {
+      this.$('input[type="checkbox"].selector').attr('checked', true);
+    },
+
+    deselected: function(e) {
+      this.$('input[type="checkbox"].selector').attr('checked', false);
+    },
   });
   
   var NewItemView = Backbone.View.extend({
@@ -70,7 +89,7 @@ $(function() {
     
     initialize: function() {
       this._modelBinder = new Backbone.ModelBinder();
-      
+            
       this.render();
     },
     
@@ -112,6 +131,7 @@ $(function() {
       'click #refresh'        : 'refresh',
       'click #addItem'        : 'addNewItem',
       'click #delete'         : 'delete',
+      'click #selectAll'      : 'toggleSelectAll',
     },
     
     initialize: function() {
@@ -126,6 +146,9 @@ $(function() {
       <%= metadata.name %>.bind('add', this.addOne, this);
       <%= metadata.name %>.bind('reset', this.addAll, this);
       <%= metadata.name %>.bind('all', this.render, this);
+      <%= metadata.name %>.bind('select:some', this.selectedSome, this);
+      <%= metadata.name %>.bind('select:all', this.selectedAll, this);
+      <%= metadata.name %>.bind('select:none', this.deselected, this);
 
       <%= metadata.name %>.fetch();
     },
@@ -143,7 +166,12 @@ $(function() {
     },
     
     delete: function(e) {
-      
+      // TODO: pop up a confirmation dialog
+      for(var i in <%= metadata.name %>.selected) {
+        var selected = <%= metadata.name %>.selected[i];
+        selected.deselect();
+        selected.destroy({wait: true});
+      }
     },
     
     addOne: function(item) {
@@ -156,8 +184,34 @@ $(function() {
     addAll: function() {
       <%= metadata.name %>.each($.proxy(this.addOne, this));
     },
+
+    enableDeleteButton: function() {
+      this.$('#delete')
+        .removeClass('disabled')
+        .removeAttr('disabled');
+    },
     
+    disableDeleteButton: function() {
+      this.$('#delete')
+        .addClass('disabled')
+        .attr('disabled', 'disabled');
+    },
     
+    selectedSome: function(e) {
+      this.enableDeleteButton();
+    },
+    
+    selectedAll: function(e) {
+      this.enableDeleteButton();
+    },
+    
+    deselected: function(e) {
+      this.disableDeleteButton();
+    },
+    
+    toggleSelectAll: function(e) {
+      <%= metadata.name %>.toggleSelectAll();
+    }
   });
   
   var App = new AppView;
