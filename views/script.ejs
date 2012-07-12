@@ -126,7 +126,7 @@ $(function() {
     events: {
       'shown'                   : 'onShown',
       'hide'                    : 'onHide',
-      'click #editItemCancel'   : 'cancel',
+      'click #editItemCancel'   : 'onCancel',
       'click #editItemSubmit'   : 'submit',
     },
     
@@ -137,6 +137,7 @@ $(function() {
       this.model.on('change', this.onChanged, this);
       
       this.$el.modal('show');
+      this.processCancel = true;
     },
     
     render: function() {
@@ -149,6 +150,10 @@ $(function() {
     
     onHide: function() {
       this._modelBinder.unbind();
+      this.model.off(null, this.onChanged, this);
+      this.undelegateEvents();
+
+      if (this.processCancel) this.cancel();
     },
     
     onChanged: function() {
@@ -161,17 +166,23 @@ $(function() {
       }
     },
     
-    cancel: function(e) {
+    onCancel: function(e) {
+      this.cancel();
+      this.$el.modal('hide');
+    },
+    
+    cancel: function() {
       if (this.revert) {
         this.model.off(null, this.onChanged, this);
         this.model.set(this.revert);
       }
-
-      this.$el.modal('hide');
+      
+      this.processCancel = false;
     },
     
     submit: function(e) {
       e.preventDefault();
+      this.processCancel = false;
       alert('save');
       this.$el.modal('hide');
     }
