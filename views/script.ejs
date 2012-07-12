@@ -69,7 +69,8 @@ $(function() {
       return this;
     },
     
-    select: function() {
+    select: function(e) {
+      e.stopPropagation();
       this.model.toggleSelected();
     },
     
@@ -308,7 +309,7 @@ $(function() {
         this.enableEditButton();
       }
       else {
-        this.disableEditButtion();
+        this.disableEditButton();
       }
     },
     
