@@ -11,11 +11,11 @@ var ObjectID = mongo.ObjectID;
 var server = new Server('localhost', 27017, { auto_reconnect: true });
 var db = new Db('records', server);
 
-// db.open(function(err, db) {
-//   if (!err) {
-//     console.log('Connected to database');
-//   }
-// });
+db.open(function(err, db) {
+  if (!err) {
+    console.log('Connected to database');
+  }
+});
 
 var app = express.createServer();
 
@@ -38,7 +38,8 @@ function loadMetadata(req, res, next) {
       name: {
         heading: 'Name',
         placeholder: 'Account Name',
-        type: 'String',
+        type: 'Name',
+        formType: 'text',
         required: true,
       },
     
@@ -46,6 +47,7 @@ function loadMetadata(req, res, next) {
         heading: 'Website',
         placeholder: 'http://www.someplace.com',
         type: 'Url',
+        formType: 'url',
         required: true,
       },
     
@@ -53,6 +55,7 @@ function loadMetadata(req, res, next) {
         heading: 'User Name',
         placeholder: 'john@doe.com',
         type: 'String',
+        formType: 'text',
         required: false,
       },
     
@@ -60,6 +63,7 @@ function loadMetadata(req, res, next) {
         heading: 'Password',
         placeholder: 'password',
         type: 'String',
+        formType: 'text',
         required: false,
       }
     }
@@ -153,9 +157,24 @@ app.put('/lists.json/:list/:item', function(req, res) {
   db.collection(req.params.list, function(err, collection) {
     console.log('Updating ' + req.params.item + ' with ');
     console.log(req.body);
-    collection.update({_id: new ObjectID(req.params.item)}, { '$set': req.body }, {safe: true}, function(err, result) {
-      console.log(result);
-      return res.send(err ? 500 : 200);
+    if (req.body.hasOwnProperty('_id')) delete req.body._id;
+
+    collection.update({_id: new ObjectID(req.params.item)}, { '$set': req.body }, {safe: true}, function(err, count) {
+      if (err) {
+        console.log(err);
+        return res.send(500);
+      }
+
+      if (count == 1) {
+        collection.findOne({_id: new ObjectID(req.params.item)}, function(err, doc) {
+          if (err) return res.send(500);
+          
+          return res.send(doc, { 'Content-Type': 'application/json' }, 200);
+        })
+      }
+      else {
+        return res.send(404);
+      }
     });
   });
 });

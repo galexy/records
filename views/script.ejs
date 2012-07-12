@@ -52,14 +52,18 @@ $(function() {
     },
     
     initialize: function() {
-      this.model.bind('change', this.render, this);
-      this.model.bind('destroy', this.remove, this);
-      this.model.bind('selected', this.selected, this);
-      this.model.bind('deselected', this.deselected, this);
+      this.model.on('change', this.render, this);
+      this.model.on('destroy', this.remove, this);
+      this.model.on('selected', this.selected, this);
+      this.model.on('deselected', this.deselected, this);
     },
     
     render: function() {
       this.$el.html(Mustache.render(this.template, this.model.toJSON()));
+      if (this.model.selected) {
+        this.$('input[type="checkbox"].selector').attr('checked', true);
+      }
+      
       return this;
     },
     
@@ -84,7 +88,7 @@ $(function() {
       'click #addItemSubmit'  : 'submit',
       'submit #newItemForm'   : 'submit',
       'shown'                 : 'shown',
-      'hide'                  : 'hide',
+      'hidden'                : 'onHidden',
     },
     
     initialize: function() {
@@ -97,10 +101,6 @@ $(function() {
       this._modelBinder.bind(this.model, this.el);
     },
     
-    close: function() {
-      this._modelBinder.unbind();
-    },
-    
     show: function() {
       this.$el.modal('show');
     },
@@ -109,7 +109,7 @@ $(function() {
       this.$('input').first().focus();
     },
     
-    hide: function() {
+    onHidden: function() {
       this.model.set(this.model.defaults());
     },
     
@@ -124,6 +124,80 @@ $(function() {
     },
   });  
 
+  var EditItemView = Backbone.View.extend({
+    el: $('#editItemModal'),
+    
+    events: {
+      'shown'                   : 'onShown',
+      'hide'                    : 'onHide',
+      'click #editItemCancel'   : 'onCancel',
+      'click #editItemSubmit'   : 'submit',
+      'submit #editItemForm'    : 'submit',
+    },
+    
+    initialize: function() {
+      this._modelBinder = new Backbone.ModelBinder();
+      
+      this.render();
+      this.model.on('change', this.onChanged, this);
+      
+      this.$el.modal('show');
+      this.processCancel = true;
+    },
+    
+    render: function() {
+      this._modelBinder.bind(this.model, this.el);
+    },
+    
+    onShown: function() {
+      this.$('input').first().focus();
+    },
+    
+    onHide: function() {
+      this._modelBinder.unbind();
+      this.model.off(null, this.onChanged, this);
+      this.undelegateEvents();
+
+      if (this.processCancel) this.cancel();
+    },
+    
+    onChanged: function() {
+      this.revert || (this.revert = {});
+      
+      for (var field in this.model.changedAttributes()) {
+        if (this.revert.hasOwnProperty(field)) continue;
+        
+        this.revert[field] = this.model.previous(field);
+      }
+    },
+    
+    onCancel: function(e) {
+      this.cancel();
+      this.$el.modal('hide');
+    },
+    
+    cancel: function() {
+      if (this.revert) {
+        this.model.off(null, this.onChanged, this);
+        this.model.set(this.revert);
+      }
+      
+      this.processCancel = false;
+    },
+    
+    submit: function(e) {
+      e.preventDefault();
+      var self = this;
+      
+      this.model.save({}, {
+        success: function(model, response) {
+          self.processCancel = false;
+          self.$el.modal('hide');
+        }
+      })
+    }
+  })
+
   var AppView = Backbone.View.extend({
     el: $('#listview'),
     
@@ -132,6 +206,7 @@ $(function() {
       'click #addItem'        : 'addNewItem',
       'click #delete'         : 'delete',
       'click #selectAll'      : 'toggleSelectAll',
+      'click #editItem'       : 'editItem',
     },
     
     initialize: function() {
@@ -143,12 +218,12 @@ $(function() {
       });
       
       // bind model events
-      <%= metadata.name %>.bind('add', this.addOne, this);
-      <%= metadata.name %>.bind('reset', this.addAll, this);
-      <%= metadata.name %>.bind('all', this.render, this);
-      <%= metadata.name %>.bind('select:some', this.selectedSome, this);
-      <%= metadata.name %>.bind('select:all', this.selectedAll, this);
-      <%= metadata.name %>.bind('select:none', this.deselected, this);
+      <%= metadata.name %>.on('add', this.addOne, this);
+      <%= metadata.name %>.on('reset', this.addAll, this);
+      <%= metadata.name %>.on('all', this.render, this);
+      <%= metadata.name %>.on('select:some', this.selectedSome, this);
+      <%= metadata.name %>.on('select:all', this.selectedAll, this);
+      <%= metadata.name %>.on('select:none', this.deselected, this);
 
       <%= metadata.name %>.fetch();
     },
@@ -171,6 +246,14 @@ $(function() {
         var selected = <%= metadata.name %>.selected[i];
         selected.deselect();
         selected.destroy({wait: true});
+      }
+    },
+    
+    editItem: function(e) {
+      for (var i in <%= metadata.name %>.selected) {
+        var editView = new EditItemView({
+          model: <%= metadata.name %>.selected[i]
+        });
       }
     },
     
@@ -197,16 +280,41 @@ $(function() {
         .attr('disabled', 'disabled');
     },
     
+    enableEditButton: function() {
+      this.$('#editItem')
+        .removeClass('disabled')
+        .removeAttr('disabled');
+    },
+    
+    disableEditButton: function() {
+      this.$('#editItem')
+        .addClass('disabled')
+        .attr('disabled', 'disabled');
+    },
+    
     selectedSome: function(e) {
       this.enableDeleteButton();
+      if (<%= metadata.name %>.selectedLength == 1) {
+        this.enableEditButton();
+      }
+      else {
+        this.disableEditButtion();
+      }
     },
     
     selectedAll: function(e) {
       this.enableDeleteButton();
+      if (<%= metadata.name %>.selectedLength == 1) {
+        this.enableEditButton();
+      }
+      else {
+        this.disableEditButton();
+      }
     },
     
     deselected: function(e) {
       this.disableDeleteButton();
+      this.disableEditButton();
     },
     
     toggleSelectAll: function(e) {
