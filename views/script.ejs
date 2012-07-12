@@ -52,10 +52,10 @@ $(function() {
     },
     
     initialize: function() {
-      this.model.bind('change', this.render, this);
-      this.model.bind('destroy', this.remove, this);
-      this.model.bind('selected', this.selected, this);
-      this.model.bind('deselected', this.deselected, this);
+      this.model.on('change', this.render, this);
+      this.model.on('destroy', this.remove, this);
+      this.model.on('selected', this.selected, this);
+      this.model.on('deselected', this.deselected, this);
     },
     
     render: function() {
@@ -97,10 +97,6 @@ $(function() {
       this._modelBinder.bind(this.model, this.el);
     },
     
-    close: function() {
-      this._modelBinder.unbind();
-    },
-    
     show: function() {
       this.$el.modal('show');
     },
@@ -128,13 +124,17 @@ $(function() {
     el: $('#editItemModal'),
     
     events: {
-      'shown'   : 'onShown',
+      'shown'                   : 'onShown',
+      'hide'                    : 'onHide',
+      'click #editItemCancel'   : 'cancel',
+      'click #editItemSubmit'   : 'submit',
     },
     
     initialize: function() {
       this._modelBinder = new Backbone.ModelBinder();
       
       this.render();
+      this.model.on('change', this.onChanged, this);
       
       this.$el.modal('show');
     },
@@ -147,12 +147,32 @@ $(function() {
       this.$('input').first().focus();
     },
     
+    onHide: function() {
+      this._modelBinder.unbind();
+    },
+    
+    onChanged: function() {
+      this.revert || (this.revert = {});
+      
+      for (var field in this.model.changedAttributes()) {
+        if (this.revert.hasOwnProperty(field)) continue;
+        
+        this.revert[field] = this.model.previous(field);
+      }
+    },
+    
     cancel: function(e) {
+      if (this.revert) {
+        this.model.off(null, this.onChanged, this);
+        this.model.set(this.revert);
+      }
+
       this.$el.modal('hide');
     },
     
     submit: function(e) {
       e.preventDefault();
+      alert('save');
       this.$el.modal('hide');
     }
   })
@@ -177,12 +197,12 @@ $(function() {
       });
       
       // bind model events
-      <%= metadata.name %>.bind('add', this.addOne, this);
-      <%= metadata.name %>.bind('reset', this.addAll, this);
-      <%= metadata.name %>.bind('all', this.render, this);
-      <%= metadata.name %>.bind('select:some', this.selectedSome, this);
-      <%= metadata.name %>.bind('select:all', this.selectedAll, this);
-      <%= metadata.name %>.bind('select:none', this.deselected, this);
+      <%= metadata.name %>.on('add', this.addOne, this);
+      <%= metadata.name %>.on('reset', this.addAll, this);
+      <%= metadata.name %>.on('all', this.render, this);
+      <%= metadata.name %>.on('select:some', this.selectedSome, this);
+      <%= metadata.name %>.on('select:all', this.selectedAll, this);
+      <%= metadata.name %>.on('select:none', this.deselected, this);
 
       <%= metadata.name %>.fetch();
     },
