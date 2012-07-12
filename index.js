@@ -11,11 +11,11 @@ var ObjectID = mongo.ObjectID;
 var server = new Server('localhost', 27017, { auto_reconnect: true });
 var db = new Db('records', server);
 
-// db.open(function(err, db) {
-//   if (!err) {
-//     console.log('Connected to database');
-//   }
-// });
+db.open(function(err, db) {
+  if (!err) {
+    console.log('Connected to database');
+  }
+});
 
 var app = express.createServer();
 
@@ -38,7 +38,7 @@ function loadMetadata(req, res, next) {
       name: {
         heading: 'Name',
         placeholder: 'Account Name',
-        type: 'String',
+        type: 'Name',
         required: true,
       },
     

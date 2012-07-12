@@ -124,6 +124,39 @@ $(function() {
     },
   });  
 
+  var EditItemView = Backbone.View.extend({
+    el: $('#editItemModal'),
+    
+    events: {
+      'shown'   : 'onShown',
+    },
+    
+    initialize: function() {
+      this._modelBinder = new Backbone.ModelBinder();
+      
+      this.render();
+      
+      this.$el.modal('show');
+    },
+    
+    render: function() {
+      this._modelBinder.bind(this.model, this.el);
+    },
+    
+    onShown: function() {
+      this.$('input').first().focus();
+    },
+    
+    cancel: function(e) {
+      this.$el.modal('hide');
+    },
+    
+    submit: function(e) {
+      e.preventDefault();
+      this.$el.modal('hide');
+    }
+  })
+
   var AppView = Backbone.View.extend({
     el: $('#listview'),
     
@@ -132,6 +165,7 @@ $(function() {
       'click #addItem'        : 'addNewItem',
       'click #delete'         : 'delete',
       'click #selectAll'      : 'toggleSelectAll',
+      'click #editItem'       : 'editItem',
     },
     
     initialize: function() {
@@ -174,6 +208,14 @@ $(function() {
       }
     },
     
+    editItem: function(e) {
+      for (var i in <%= metadata.name %>.selected) {
+        var editView = new EditItemView({
+          model: <%= metadata.name %>.selected[i]
+        });
+      }
+    },
+    
     addOne: function(item) {
       var view = new <%= metadata.className %>View({
         model: item
@@ -197,16 +239,41 @@ $(function() {
         .attr('disabled', 'disabled');
     },
     
+    enableEditButton: function() {
+      this.$('#editItem')
+        .removeClass('disabled')
+        .removeAttr('disabled');
+    },
+    
+    disableEditButton: function() {
+      this.$('#editItem')
+        .addClass('disabled')
+        .attr('disabled', 'disabled');
+    },
+    
     selectedSome: function(e) {
       this.enableDeleteButton();
+      if (<%= metadata.name %>.selectedLength == 1) {
+        this.enableEditButton();
+      }
+      else {
+        this.disableEditButtion();
+      }
     },
     
     selectedAll: function(e) {
       this.enableDeleteButton();
+      if (<%= metadata.name %>.selectedLength == 1) {
+        this.enableEditButton();
+      }
+      else {
+        this.disableEditButton();
+      }
     },
     
     deselected: function(e) {
       this.disableDeleteButton();
+      this.disableEditButton();
     },
     
     toggleSelectAll: function(e) {

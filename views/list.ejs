@@ -11,6 +11,7 @@
           <div class="btn-group span6">
             <btn class="btn" id="refresh"><i class="icon-refresh"></i></btn>
             <btn class="btn" id="addItem"><i class="icon-plus-sign"></i></btn>
+            <btn class="btn disabled" id="editItem" disabled="disabled"><i class="icon-pencil"></i></btn>
             <btn class="btn disabled" id="delete" disabled="disabled"><i class="icon-trash"></i></btn>
           </div>
         </div>
@@ -37,6 +38,8 @@
             <td>{{<%= fieldName %>}}</td>
           <% break; case 'Url': %>
             <td><a href="{{<%= fieldName%>}}">{{<%= fieldName%>}}</a></td>
+          <% break; case 'Name': %>
+            <td><a class="namefield">{{<%= fieldName%>}}</a></td>
           <% break; %>
       <% }} %>
     </script>
@@ -44,4 +47,5 @@
   </div>
 
   <%- partial('newItemModal.ejs') %>
+  <%- partial('editItemModal.ejs') %>
 </div>
