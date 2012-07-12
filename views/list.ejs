@@ -5,14 +5,27 @@
     <%- partial('sidenav.ejs') %>
 
     <div class="span9">
-      <div class="page-header">
+      <div class="page-header" style="padding-bottom: 5px; margin-bottom: 10px;">
         <div class="row-fluid">
-          <h1 id="title" class="pull-left span3 offset4"><%= metadata.title %></h1>
-          <div class="btn-group span6">
-            <btn class="btn" id="refresh"><i class="icon-refresh"></i></btn>
-            <btn class="btn" id="addItem"><i class="icon-plus-sign"></i></btn>
-            <btn class="btn disabled" id="editItem" disabled="disabled"><i class="icon-pencil"></i></btn>
-            <btn class="btn disabled" id="delete" disabled="disabled"><i class="icon-trash"></i></btn>
+          <h1 id="title" class="pull-left"><%= metadata.title %></h1>
+          <div class="btn-toolbar span9" style="margin-top: 0; margin-bottom: 0;">
+            <div class="btn-group">
+              <btn class="btn" id="refresh"><i class="icon-refresh"></i> Refresh</btn>
+              <btn class="btn" id="addItem"><i class="icon-plus"></i> New</btn>
+              <btn class="btn disabled" id="editItem" disabled="disabled"><i class="icon-pencil"></i> Edit</btn>
+              <btn class="btn disabled" id="delete" disabled="disabled"><i class="icon-trash"></i> Delete</btn>
+            </div>
+            <div class="btn-group">
+              <btn class="btn"><i class="icon-wrench"></i> Configure</btn>
+            </div>
+            <div class="btn-group">
+              <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">Views
+                <span class="caret"></span>
+              </a>
+              <ul class="dropdown-menu">
+                <li><a href="/lists/<%= metadata.name %>">Default</a></li>
+              </ul>
+            </div>
           </div>
         </div>
       </div>
