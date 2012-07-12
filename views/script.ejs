@@ -49,6 +49,7 @@ $(function() {
     
     events: {
       'click input[type="checkbox"].selector' : 'select',
+      'click .namefield'                      : 'edit',
       'click'                                 : 'select',
     },
     
@@ -70,6 +71,14 @@ $(function() {
     
     select: function() {
       this.model.toggleSelected();
+    },
+    
+    edit: function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      var editView = new EditItemView({
+        model: this.model
+      });
     },
     
     selected: function(e) {
