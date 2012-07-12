@@ -34,11 +34,14 @@
       <td><input class="selector" type="checkbox"></input></td>
       <% for (fieldName in metadata.fields) {
         var field = metadata.fields[fieldName];
-        switch(field.type) { case 'String': %>
+        switch(field.type) { 
+          case 'String': %>
             <td>{{<%= fieldName %>}}</td>
-          <% break; case 'Url': %>
+          <% break; 
+          case 'Url': %>
             <td><a href="{{<%= fieldName%>}}">{{<%= fieldName%>}}</a></td>
-          <% break; case 'Name': %>
+          <% break; 
+          case 'Name': %>
             <td><a class="namefield">{{<%= fieldName%>}}</a></td>
           <% break; %>
       <% }} %>

@@ -39,6 +39,7 @@ function loadMetadata(req, res, next) {
         heading: 'Name',
         placeholder: 'Account Name',
         type: 'Name',
+        formType: 'text',
         required: true,
       },
     
@@ -46,6 +47,7 @@ function loadMetadata(req, res, next) {
         heading: 'Website',
         placeholder: 'http://www.someplace.com',
         type: 'Url',
+        formType: 'url',
         required: true,
       },
     
@@ -53,6 +55,7 @@ function loadMetadata(req, res, next) {
         heading: 'User Name',
         placeholder: 'john@doe.com',
         type: 'String',
+        formType: 'text',
         required: false,
       },
     
@@ -60,6 +63,7 @@ function loadMetadata(req, res, next) {
         heading: 'Password',
         placeholder: 'password',
         type: 'String',
+        formType: 'text',
         required: false,
       }
     }

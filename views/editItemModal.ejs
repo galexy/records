@@ -6,11 +6,15 @@
   <div class="modal-body">
     <form class="form-horizontal well" id="editItemForm">
       <fieldset>
-        <% for (field in metadata.fields) { %>
+        <% for (field in metadata.fields) { 
+          var fieldMetadata = metadata.fields[field]; %>
         <div class="control-group">
-            <label class="control-label" for="input01"><%= metadata.fields[field].heading %></label>
+            <label class="control-label" for="input01"><%= fieldMetadata.heading %></label>
             <div class="controls">
-              <input name="<%= field %>" type="text" class="input-xlarge" placeholder="<%= metadata.fields[field].placeholder %>"></input>
+              <input name="<%= field %>"
+                     type="<%= fieldMetadata.formType %>" 
+                     class="input-xlarge"
+                     placeholder="<%= fieldMetadata.placeholder %>"></input>
             </div>
         </div>
         <% } %>
@@ -20,6 +24,6 @@
   </div>
   <div class="modal-footer">
     <a href="#" id="editItemCancel" class="btn btn-inverse">Cancel</a>
-    <a href="#" id="editItemSubmit" class="btn btn-primary" class="submit">Add Item</a>
+    <a href="#" id="editItemSubmit" class="btn btn-primary" class="submit">Update</a>
   </div>
 </div>
