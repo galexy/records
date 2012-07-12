@@ -157,9 +157,24 @@ app.put('/lists.json/:list/:item', function(req, res) {
   db.collection(req.params.list, function(err, collection) {
     console.log('Updating ' + req.params.item + ' with ');
     console.log(req.body);
-    collection.update({_id: new ObjectID(req.params.item)}, { '$set': req.body }, {safe: true}, function(err, result) {
-      console.log(result);
-      return res.send(err ? 500 : 200);
+    if (req.body.hasOwnProperty('_id')) delete req.body._id;
+
+    collection.update({_id: new ObjectID(req.params.item)}, { '$set': req.body }, {safe: true}, function(err, count) {
+      if (err) {
+        console.log(err);
+        return res.send(500);
+      }
+
+      if (count == 1) {
+        collection.findOne({_id: new ObjectID(req.params.item)}, function(err, doc) {
+          if (err) return res.send(500);
+          
+          return res.send(doc, { 'Content-Type': 'application/json' }, 200);
+        })
+      }
+      else {
+        return res.send(404);
+      }
     });
   });
 });

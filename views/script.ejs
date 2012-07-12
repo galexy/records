@@ -84,7 +84,7 @@ $(function() {
       'click #addItemSubmit'  : 'submit',
       'submit #newItemForm'   : 'submit',
       'shown'                 : 'shown',
-      'hide'                  : 'hide',
+      'hidden'                : 'onHidden',
     },
     
     initialize: function() {
@@ -105,7 +105,7 @@ $(function() {
       this.$('input').first().focus();
     },
     
-    hide: function() {
+    onHidden: function() {
       this.model.set(this.model.defaults());
     },
     
@@ -128,6 +128,7 @@ $(function() {
       'hide'                    : 'onHide',
       'click #editItemCancel'   : 'onCancel',
       'click #editItemSubmit'   : 'submit',
+      'submit #editItemForm'    : 'submit',
     },
     
     initialize: function() {
@@ -182,9 +183,14 @@ $(function() {
     
     submit: function(e) {
       e.preventDefault();
-      this.processCancel = false;
-      alert('save');
-      this.$el.modal('hide');
+      var self = this;
+      
+      this.model.save({}, {
+        success: function(model, response) {
+          self.processCancel = false;
+          self.$el.modal('hide');
+        }
+      })
     }
   })
 
