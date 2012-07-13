@@ -1,13 +1,28 @@
 <% script = '/lists/passwords/script.js' %>
+<% title = metadata.title %>
 
-<div id="listview">
-  <div class="row-fluid">
-    <%- partial('sidenav.ejs') %>
+<ul class="breadcrumb" style="width: 100%">
+  <li>
+    <a href="/">Home</a> <span class="divider">></span>
+  </li>
+  <li>
+    <a href="/lists">Lists</a> <span class="divider">></span>
+  </li>
+  <li>
+    <a href="/lists/<%= metadata.name %>"><%= metadata.title %></a> <span class="divider">></span>
+  </li>
+  <li class="active">
+    Standard
+  </li>
+</ul>
 
-    <div class="span9">
-      <div class="page-header" style="padding-bottom: 5px; margin-bottom: 10px;">
+<div class="container-fluid">
+  <div id="listview">
+    <div class="row-fluid">
+      <%- partial('sidenav.ejs') %>
+
+      <div class="span10">
         <div class="row-fluid">
-          <h1 id="title" class="pull-left"><%= metadata.title %></h1>
           <div class="btn-toolbar span9" style="margin-top: 0; margin-bottom: 0;">
             <div class="btn-group">
               <btn class="btn" id="refresh"><i class="icon-refresh"></i> Refresh</btn>
@@ -16,51 +31,54 @@
               <btn class="btn disabled" id="delete" disabled="disabled"><i class="icon-trash"></i> Delete</btn>
             </div>
             <div class="btn-group">
-              <btn class="btn"><i class="icon-wrench"></i> Configure</btn>
+              <a href="<%= metadata.name %>/admin" class="btn"><i class="icon-wrench"></i> Configure</a>
             </div>
             <div class="btn-group">
               <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">Views
                 <span class="caret"></span>
               </a>
               <ul class="dropdown-menu">
-                <li><a href="/lists/<%= metadata.name %>">Default</a></li>
+                <li><a href="/lists/<%= metadata.name %>">Standard</a></li>
               </ul>
             </div>
           </div>
         </div>
+        <table class="table table-striped table-condensed">
+          <thead>
+            <tr>
+              <th><input id="selectAll" type="checkbox"></input></th>
+              <% metadata.fields.forEach(function(field) { %>
+                <th><%= field.heading %></th>
+              <% }) %>
+            </tr>
+          </thead>
+          <tbody>
+          </tbody>
+        </table>
       </div>
-      <table class="table table-striped table-condensed">
-        <thead>
-          <tr>
-            <th><input id="selectAll" type="checkbox"></input></th>
-            <% metadata.fields.forEach(function(field) { %>
-              <th><%= field.heading %></th>
-            <% }) %>
-          </tr>
-        </thead>
-        <tbody>
-        </tbody>
-      </table>
+  
+      <script type="template" id="listItemTemplate">
+        <td><input class="selector" type="checkbox"></input></td>
+        <% metadata.fields.forEach(function(field) {
+            switch(field.type) { 
+              case 'String': %>
+                <td>{{<%= field.name %>}}</td>
+              <% break; 
+              case 'Url': %>
+                <td><a href="{{<%= field.name%>}}">{{<%= field.name %>}}</a></td>
+              <% break; 
+              case 'Name': %>
+                <td><a class="namefield">{{<%= field.name %>}}</a></td>
+              <% break; 
+          }}) %>
+      </script>
+  
     </div>
-  
-    <script type="template" id="listItemTemplate">
-      <td><input class="selector" type="checkbox"></input></td>
-      <% metadata.fields.forEach(function(field) {
-          switch(field.type) { 
-            case 'String': %>
-              <td>{{<%= field.name %>}}</td>
-            <% break; 
-            case 'Url': %>
-              <td><a href="{{<%= field.name%>}}">{{<%= field.name %>}}</a></td>
-            <% break; 
-            case 'Name': %>
-              <td><a class="namefield">{{<%= field.name %>}}</a></td>
-            <% break; 
-        }}) %>
-    </script>
-  
-  </div>
 
-  <%- partial('newItemModal.ejs') %>
-  <%- partial('editItemModal.ejs') %>
+    <%- partial('newItemModal.ejs') %>
+    <%- partial('editItemModal.ejs') %>
+  </div>
+  
+  <hr />
+  
 </div>

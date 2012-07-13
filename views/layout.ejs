@@ -7,7 +7,7 @@
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 
-	<title></title>
+	<title><%- title %></title>
 	<meta name="description" content="">
 	<meta name="author" content="">
 
@@ -26,15 +26,9 @@
 <body>
 <!--[if lt IE 7]><p class=chromeframe>Your browser is <em>ancient!</em> <a href="http://browsehappy.com/">Upgrade to a different browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">install Google Chrome Frame</a> to experience this site.</p><![endif]-->
 
-  <%- partial('navbar.ejs') %>
+<%- partial('navbar.ejs') %>
 
-  <div class="container-fluid">
-
-    <%- body %>
-    
-    <hr />
-
-  </div> <!-- /container -->
+<%- body %>
 
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
 <script src="/js/libs/bootstrap/bootstrap.min.js"></script>
