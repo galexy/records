@@ -3,6 +3,7 @@
  */
 var express = require('express');
 var mongo = require('mongodb');
+var inflection = require('inflection');
 
 var Server = mongo.Server;
 var Db = mongo.Db;
@@ -27,12 +28,17 @@ app.configure(function () {
 
 app.set('view engine', 'ejs')
 
+app.error(function(err, req, res, next) {
+  console.log(err);
+  
+  next(err);
+})
+
 function loadMetadata(req, res, next) {
   req.metadata = {
-    title: 'Passwords',
     name: 'passwords',
-    single: 'password',
-    className: 'Password',
+    title: 'Passwords',
+    description: 'List of passwords',
     
     fields: {
       name: {
@@ -73,11 +79,23 @@ function loadMetadata(req, res, next) {
 }
 
 app.get('/lists/:list', loadMetadata, function(req, res) {
-  res.render('list', { list: req.params.list, metadata: req.metadata });
+  res.render('list', { 
+    list: req.params.list,
+    metadata: req.metadata,
+  });
 })
 
 app.get('/lists/:list/script.js', loadMetadata, function(req, res) {
-  res.render('script', { layout: false, list: req.params.list, metadata: req.metadata });
+  var baseClassName = inflection.classify(req.metadata.name);
+  
+  res.contentType('text/javascript');
+  res.render('script', { 
+    layout: false, 
+    list: req.params.list, 
+    metadata: req.metadata,
+    modelClassName: baseClassName,
+    listClassName: baseClassName + 'List',    
+  });
 })
 
 app.get('/lists.json/:list/metadata', loadMetadata, function(req, res) {

@@ -8,7 +8,7 @@ $(function() {
    * Models
    **************************/
 
-  var <%= metadata.className %> = Backbone.Model.extend({
+  var <%= modelClassName %> = Backbone.Model.extend({
     
     defaults: function() {
       return {
@@ -26,9 +26,9 @@ $(function() {
     }
   });
 
-  var <%= metadata.name%>List = Backbone.Collection.extend({
+  var <%= listClassName %> = Backbone.Collection.extend({
     
-    model: <%= metadata.className %>,
+    model: <%= modelClassName %>,
     
     url: '/lists.json/<%= metadata.name %>',
     
@@ -39,9 +39,9 @@ $(function() {
 
   });
   
-  var <%= metadata.name %> = new <%= metadata.name %>List;
+  var list = new <%= listClassName %>;
   
-  var <%= metadata.className %>View = Backbone.View.extend({
+  var ItemView = Backbone.View.extend({
     
     tagName: 'tr',
     
@@ -130,7 +130,7 @@ $(function() {
     
     submit: function(e) {
       e.preventDefault();
-      <%= metadata.name %>.create(this.model.toJSON());
+      list.create(this.model.toJSON());
       this.$el.modal('hide');
     },
   });  
@@ -225,18 +225,18 @@ $(function() {
       this.table = this.$('tbody');
       
       this.newItemView = new NewItemView({
-        model: new <%= metadata.className %>,
+        model: new <%= modelClassName %>
       });
       
       // bind model events
-      <%= metadata.name %>.on('add', this.addOne, this);
-      <%= metadata.name %>.on('reset', this.addAll, this);
-      <%= metadata.name %>.on('all', this.render, this);
-      <%= metadata.name %>.on('select:some', this.selectedSome, this);
-      <%= metadata.name %>.on('select:all', this.selectedAll, this);
-      <%= metadata.name %>.on('select:none', this.deselected, this);
+      list.on('add', this.addOne, this);
+      list.on('reset', this.addAll, this);
+      list.on('all', this.render, this);
+      list.on('select:some', this.selectedSome, this);
+      list.on('select:all', this.selectedAll, this);
+      list.on('select:none', this.deselected, this);
 
-      <%= metadata.name %>.fetch();
+      list.fetch();
     },
     
     render: function() {
@@ -253,30 +253,30 @@ $(function() {
     
     delete: function(e) {
       // TODO: pop up a confirmation dialog
-      for(var i in <%= metadata.name %>.selected) {
-        var selected = <%= metadata.name %>.selected[i];
+      for(var i in list.selected) {
+        var selected = list.selected[i];
         selected.deselect();
         selected.destroy({wait: true});
       }
     },
     
     editItem: function(e) {
-      for (var i in <%= metadata.name %>.selected) {
+      for (var i in list.selected) {
         var editView = new EditItemView({
-          model: <%= metadata.name %>.selected[i]
+          model: list.selected[i]
         });
       }
     },
     
     addOne: function(item) {
-      var view = new <%= metadata.className %>View({
+      var view = new ItemView({
         model: item
       });
       this.table.append(view.render().el);
     },
     
     addAll: function() {
-      <%= metadata.name %>.each($.proxy(this.addOne, this));
+      list.each($.proxy(this.addOne, this));
     },
 
     enableDeleteButton: function() {
@@ -305,7 +305,7 @@ $(function() {
     
     selectedSome: function(e) {
       this.enableDeleteButton();
-      if (<%= metadata.name %>.selectedLength == 1) {
+      if (list.selectedLength == 1) {
         this.enableEditButton();
       }
       else {
@@ -315,7 +315,7 @@ $(function() {
     
     selectedAll: function(e) {
       this.enableDeleteButton();
-      if (<%= metadata.name %>.selectedLength == 1) {
+      if (list.selectedLength == 1) {
         this.enableEditButton();
       }
       else {
@@ -329,7 +329,7 @@ $(function() {
     },
     
     toggleSelectAll: function(e) {
-      <%= metadata.name %>.toggleSelectAll();
+      list.toggleSelectAll();
     }
   });
   
