@@ -91,7 +91,7 @@ app.get('/lists/:list', loadMetadata, function(req, res) {
 app.get('/lists/:list/script.js', loadMetadata, function(req, res) {
   var baseClassName = inflection.classify(req.metadata.name);
   
-  res.contentType('text/javascript');
+  res.contentType('js');
   res.render('script', { 
     layout: false, 
     list: req.params.list, 
@@ -101,11 +101,10 @@ app.get('/lists/:list/script.js', loadMetadata, function(req, res) {
   });
 })
 
-app.get('/lists.json/:list/metadata', loadMetadata, function(req, res) {
-  res.send(req.metadata, 200);
-})
-
-app.get('/lists.json/:list', function(req, res) {
+/**
+ * REST API Routes
+ */
+app.get   ('/api/lists/:list', function(req, res) {
   db.collection(req.params.list, function(err, collection) {
     var stream = collection.find().stream();
     var list = [];
@@ -120,7 +119,7 @@ app.get('/lists.json/:list', function(req, res) {
   })
 })
 
-app.post('/lists.json/:list', function(req, res) {
+app.post  ('/api/lists/:list', function(req, res) {
   console.log('posting to list: ' + req.params.list);
   
   if (!req.is('application/json'))
@@ -137,7 +136,7 @@ app.post('/lists.json/:list', function(req, res) {
   });
 });
 
-app.get('/lists.json/:list/:item', function(req, res) {
+app.get   ('/api/lists/:list/:item', function(req, res) {
   db.collection(req.params.list, function(err, collection) {
     if (err)
       return res.send(500);
@@ -154,24 +153,7 @@ app.get('/lists.json/:list/:item', function(req, res) {
   });
 });
 
-app.delete('/lists.json/:list/:item', function(req, res) {
-  db.collection(req.params.list, function(err, collection) {
-    if (err)
-      return res.send(500);
-      
-    collection.remove({_id: new ObjectID(req.params.item)}, function(err, count) {
-      if (err)
-        return res.send(500);
-        
-      if (0 == count)
-        return res.send(404);
-        
-      return res.send({});
-    })
-  })
-})
-
-app.put('/lists.json/:list/:item', function(req, res) {
+app.put   ('/api/lists/:list/:item', function(req, res) {
   if (!req.is('application/json'))
     return res.send(400);
   
@@ -198,7 +180,28 @@ app.put('/lists.json/:list/:item', function(req, res) {
       }
     });
   });
-});
+})
+
+app.delete('/api/lists/:list/:item', function(req, res) {
+  db.collection(req.params.list, function(err, collection) {
+    if (err)
+      return res.send(500);
+      
+    collection.remove({_id: new ObjectID(req.params.item)}, function(err, count) {
+      if (err)
+        return res.send(500);
+        
+      if (0 == count)
+        return res.send(404);
+        
+      return res.send({});
+    })
+  })
+})
+
+app.get   ('/api/lists/:list/metadata', loadMetadata, function(req, res) {
+  res.send(req.metadata, 200);
+})
 
 var port = process.env['PORT'] || 3000;
 app.listen(port);

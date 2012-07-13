@@ -30,7 +30,7 @@ $(function() {
     
     model: <%= modelClassName %>,
     
-    url: '/lists.json/<%= metadata.name %>',
+    url: '/api/lists/<%= metadata.name %>',
     
     initialize: function() {
       var multiSelect = new Backbone.Picky.MultiSelect(this);
