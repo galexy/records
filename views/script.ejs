@@ -9,12 +9,12 @@ $(function() {
    **************************/
 
   var <%= modelClassName %> = Backbone.Model.extend({
-    
+
     defaults: function() {
       return {
-        <% for (field in metadata.fields) { %>
-        <%= field %>: '',
-        <% } %>
+        <% metadata.fields.forEach(function(field) { %>
+          <%= field.name %>: '',
+        <% }) %>
       }
     },
     

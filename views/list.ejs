@@ -33,9 +33,9 @@
         <thead>
           <tr>
             <th><input id="selectAll" type="checkbox"></input></th>
-            <% for (field in metadata.fields) { %>
-              <th><%= metadata.fields[field].heading %></th>
-            <% } %>
+            <% metadata.fields.forEach(function(field) { %>
+              <th><%= field.heading %></th>
+            <% }) %>
           </tr>
         </thead>
         <tbody>
@@ -45,19 +45,18 @@
   
     <script type="template" id="listItemTemplate">
       <td><input class="selector" type="checkbox"></input></td>
-      <% for (fieldName in metadata.fields) {
-        var field = metadata.fields[fieldName];
-        switch(field.type) { 
-          case 'String': %>
-            <td>{{<%= fieldName %>}}</td>
-          <% break; 
-          case 'Url': %>
-            <td><a href="{{<%= fieldName%>}}">{{<%= fieldName%>}}</a></td>
-          <% break; 
-          case 'Name': %>
-            <td><a class="namefield">{{<%= fieldName%>}}</a></td>
-          <% break; %>
-      <% }} %>
+      <% metadata.fields.forEach(function(field) {
+          switch(field.type) { 
+            case 'String': %>
+              <td>{{<%= field.name %>}}</td>
+            <% break; 
+            case 'Url': %>
+              <td><a href="{{<%= field.name%>}}">{{<%= field.name %>}}</a></td>
+            <% break; 
+            case 'Name': %>
+              <td><a class="namefield">{{<%= field.name %>}}</a></td>
+            <% break; 
+        }}) %>
     </script>
   
   </div>

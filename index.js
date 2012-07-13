@@ -40,39 +40,42 @@ function loadMetadata(req, res, next) {
     title: 'Passwords',
     description: 'List of passwords',
     
-    fields: {
-      name: {
+    fields: [
+      {
+        name: 'name',
         heading: 'Name',
         placeholder: 'Account Name',
         type: 'Name',
         formType: 'text',
         required: true,
+        default: '',
       },
-    
-      url: {
+      {
+        name: 'url',
         heading: 'Website',
         placeholder: 'http://www.someplace.com',
         type: 'Url',
         formType: 'url',
         required: true,
+        default: '',
       },
-    
-      username: {
+      {
+        name: 'username',
         heading: 'User Name',
         placeholder: 'john@doe.com',
         type: 'String',
         formType: 'text',
         required: false,
       },
-    
-      password: {
+      {
+        name: 'password',
         heading: 'Password',
         placeholder: 'password',
         type: 'String',
         formType: 'text',
         required: false,
       }
-    }
+    ]
   };
   
   next();
