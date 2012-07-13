@@ -104,103 +104,107 @@ app.get('/lists/:list/script.js', loadMetadata, function(req, res) {
 /**
  * REST API Routes
  */
-app.get   ('/api/lists/:list', function(req, res) {
+app.all   ('/api/lists/:list', function(req, res, next) {
   db.collection(req.params.list, function(err, collection) {
-    var stream = collection.find().stream();
-    var list = [];
-
-    stream.on('close', function() {
-      res.send(list, { 'Content-Type': 'application/json'}, 200);
-    })
+    if (err) return res.send(500);
     
-    stream.on('data', function(data) {
-      list.push(data);
-    })
+    req.collection = collection;
+    next();
+  })
+}) 
+ 
+app.get   ('/api/lists/:list', function(req, res) {
+  var stream = req.collection.find().stream();
+  var list = [];
+
+  stream.on('close', function() {
+    res.send(list, { 'Content-Type': 'application/json'}, 200);
+  })
+  
+  stream.on('data', function(data) {
+    list.push(data);
   })
 })
 
 app.post  ('/api/lists/:list', function(req, res) {
   console.log('posting to list: ' + req.params.list);
   
-  if (!req.is('application/json'))
-    return res.send(400);
+  if (!req.is('application/json')) return res.send(400);
   
-  db.collection(req.params.list, function(err, collection) {
-    collection.insert(req.body, {safe: true}, function(err, result) {
-      if (err)
-        return res.send(500);
-      
-      res.header('Location', '/lists/' + req.params.list + '/' + result[0]._id);
-      return res.send(result[0], { 'Content-Type': 'application/json' }, 201);
-    });
+  req.collection.insert(req.body, {safe: true}, function(err, result) {
+    if (err) return res.send(500);
+    
+    res.header('Location', '/lists/' + req.params.list + '/' + result[0]._id);
+    return res.send(result[0], { 'Content-Type': 'application/json' }, 201);
   });
 });
 
-app.get   ('/api/lists/:list/:item', function(req, res) {
+app.all   ('/api/lists/:list/:item', function(req, res, next) {
   db.collection(req.params.list, function(err, collection) {
-    if (err)
-      return res.send(500);
+    if (err) return res.send(500);
     
-    collection.findOne({_id: new ObjectID(req.params.item)}, function(err, doc) {
-      if (err)
-        return res.send(500);
-      
-      if (!doc)
-        return res.send(404);
-      
-      res.send(doc, { 'Content-Type': 'application/json'}, 200);
-    });
+    req.collection = collection;
+    next();
+  })
+})
+
+app.get   ('/api/lists/:list/:item', function(req, res) {
+  req.collection.findOne({_id: new ObjectID(req.params.item)}, function(err, doc) {
+    if (err) return res.send(500);
+    if (!doc) return res.send(404);
+    
+    res.send(doc, { 'Content-Type': 'application/json'}, 200);
   });
 });
 
 app.put   ('/api/lists/:list/:item', function(req, res) {
-  if (!req.is('application/json'))
-    return res.send(400);
+  if (!req.is('application/json')) return res.send(400);
   
-  db.collection(req.params.list, function(err, collection) {
-    console.log('Updating ' + req.params.item + ' with ');
-    console.log(req.body);
-    if (req.body.hasOwnProperty('_id')) delete req.body._id;
+  console.log('Updating ' + req.params.item + ' with ');
+  console.log(req.body);
+  if (req.body.hasOwnProperty('_id')) delete req.body._id;
 
-    collection.update({_id: new ObjectID(req.params.item)}, { '$set': req.body }, {safe: true}, function(err, count) {
-      if (err) {
-        console.log(err);
-        return res.send(500);
-      }
+  req.collection.update({_id: new ObjectID(req.params.item)}, { '$set': req.body }, {safe: true}, function(err, count) {
+    if (err) {
+      console.log(err);
+      return res.send(500);
+    }
 
-      if (count == 1) {
-        collection.findOne({_id: new ObjectID(req.params.item)}, function(err, doc) {
-          if (err) return res.send(500);
-          
-          return res.send(doc, { 'Content-Type': 'application/json' }, 200);
-        })
-      }
-      else {
-        return res.send(404);
-      }
-    });
+    if (count == 1) {
+      req.collection.findOne({_id: new ObjectID(req.params.item)}, function(err, doc) {
+        if (err) return res.send(500);
+        
+        return res.send(doc, { 'Content-Type': 'application/json' }, 200);
+      })
+    }
+    else {
+      return res.send(404);
+    }
   });
 })
 
 app.delete('/api/lists/:list/:item', function(req, res) {
-  db.collection(req.params.list, function(err, collection) {
-    if (err)
-      return res.send(500);
+  req.collection.remove({_id: new ObjectID(req.params.item)}, function(err, count) {
+    if (err) return res.send(500);
       
-    collection.remove({_id: new ObjectID(req.params.item)}, function(err, count) {
-      if (err)
-        return res.send(500);
-        
-      if (0 == count)
-        return res.send(404);
-        
-      return res.send({});
-    })
+    if (0 == count) return res.send(404);
+      
+    return res.send({});
   })
 })
 
-app.get   ('/api/lists/:list/metadata', loadMetadata, function(req, res) {
-  res.send(req.metadata, 200);
+app.get   ('/api/metadata/lists/:list', loadMetadata, function(req, res) {
+  db.collection('_metadata', function(err, collection) {
+    if (err) return res.send(500);
+    
+    collection.findOne({name: req.params.list}, function(err, doc) {
+      if (err) return res.send(500);
+      
+      if (!doc) return res.send(404);
+      
+      res.send(doc, {'Content-Type': 'application/json'}, 200);
+    });
+  });
 })
 
 var port = process.env['PORT'] || 3000;
