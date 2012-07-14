@@ -1,0 +1,67 @@
+<% script = '/lists/<%= list %>/admin.js' %>
+<% title = metadata.title %>
+
+<ul class="breadcrumb" style="width: 100%">
+  <li>
+    <a href="/">Home</a> <span class="divider">></span>
+  </li>
+  <li>
+    <a href="/lists">Lists</a> <span class="divider">></span>
+  </li>
+  <li>
+    <a href="/lists/<%= list %>"><%= metadata.title %></a> <span class="divider">></span>
+  </li>
+  <li class="active">
+    Configuration
+  </li>
+</ul>
+
+<div class="container-fluid">
+  <div id="listview">
+    <div class="row-fluid">
+      <%- partial('sidenav.ejs') %>
+
+      <div class="span10">
+        <div class="row-fluid">
+          <div class="btn-toolbar span9" style="margin-top: 0; margin-bottom: 0;">
+            <div class="btn-group">
+              <btn class="btn" id="addItem"><i class="icon-plus"></i> New Column</btn>
+              <btn class="btn" id="save"><i class="icon-hdd"></i> Save</btn>
+            </div>
+          </div>
+        </div>
+        <table class="table table-striped table-condensed">
+          <thead>
+            <tr>
+              <th></th>
+              <th>Name</th>
+              <th>Heading</th>
+              <th>Type</th>
+              <th>Place Holder</th>
+              <th>Required</th>
+              <th>Default</th>
+            </tr>
+          </thead>
+          <tbody>
+          </tbody>
+        </table>
+      </div>
+  
+      <script type="template" id="fieldTemplate">
+        <tr>
+          <td><i class="icon-remove"></i></td>
+          <td>{{name}}</td>
+          <td>{{heading}}</td>
+          <td>{{type}}</td>
+          <td>{{placeholder}}</td>
+          <td>{{required}}</td>
+          <td>{{default}}</td>
+        </tr>
+      </script>
+  
+    </div>
+  </div>
+  
+  <hr />
+  
+</div>

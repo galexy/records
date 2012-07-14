@@ -81,6 +81,9 @@ function loadMetadata(req, res, next) {
   next();
 }
 
+/**
+ * List view
+ */
 app.get('/lists/:list', loadMetadata, function(req, res) {
   res.render('list', { 
     list: req.params.list,
@@ -88,7 +91,7 @@ app.get('/lists/:list', loadMetadata, function(req, res) {
   });
 })
 
-app.get('/lists/:list/script.js', loadMetadata, function(req, res) {
+app.get('/lists/:list/script.js', loadMetadata, function(req, res) { 
   var baseClassName = inflection.classify(req.metadata.name);
   
   res.contentType('js');
@@ -99,6 +102,20 @@ app.get('/lists/:list/script.js', loadMetadata, function(req, res) {
     modelClassName: baseClassName,
     listClassName: baseClassName + 'List',    
   });
+})
+
+/**
+ * List Admin View
+ */
+app.get('/lists/:list/admin', function(req, res) {
+  res.render('admin', {
+    list: req.params.list,
+    metadata: req.metadata,
+  })
+})
+
+app.get('/lists/:list/admin.js', function(req, res) {
+  
 })
 
 /**
