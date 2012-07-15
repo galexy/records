@@ -91,15 +91,25 @@ $(function() {
     
     template: $('#fieldTemplate').text(),
     
+    events: {
+      'click .icon-remove'  : 'delete',
+    },
+    
     initialize: function() {
-      
+      this.model.bind('change', this.render, this);
+      this.model.bind('destroy', this.remove, this);
     },
     
     render: function() {
       this.$el.html(Mustache.render(this.template, this.model.toJSON()));
       return this;
     },
-  })
+    
+    delete: function(e) {
+      e.preventDefault();
+      this.model.destroy();
+    },
+  });
   
   var SettingsView = Backbone.View.extend({
     el: $('#admin-view'),
