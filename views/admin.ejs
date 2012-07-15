@@ -24,7 +24,7 @@
       <div class="span10">
         <div class="btn-toolbar span9" style="margin-top: 0; margin-bottom: 0;">
           <div class="btn-group">
-            <btn class="btn" id="addItem"><i class="icon-plus"></i> New Column</btn>
+            <btn class="btn" id="addField"><i class="icon-plus"></i> New Column</btn>
             <btn class="btn" id="save"><i class="icon-hdd"></i> Save</btn>
           </div>
         </div>
@@ -72,7 +72,7 @@
   
       <script type="template" id="fieldTemplate">
         <td><i class="icon-remove"></i></td>
-        <td>{{name}}</td>
+        <td><a class="namefield">{{name}}</a></td>
         <td>{{heading}}</td>
         <td>{{type}}</td>
         <td>{{placeholder}}</td>
@@ -81,6 +81,9 @@
       </script>
   
     </div>
+    
+    <%- partial('newFieldModal.ejs') %>
+    
   </div>
   
   <hr />
