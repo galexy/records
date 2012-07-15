@@ -107,15 +107,11 @@ app.get('/lists/:list/script.js', loadMetadata, function(req, res) {
 /**
  * List Admin View
  */
-app.get('/lists/:list/admin', function(req, res) {
+app.get('/lists/:list/admin', loadMetadata, function(req, res) {
   res.render('admin', {
     list: req.params.list,
     metadata: req.metadata,
   })
-})
-
-app.get('/lists/:list/admin.js', function(req, res) {
-  
 })
 
 /**
