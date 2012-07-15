@@ -22,11 +22,6 @@ $(function() {
   
   var FieldCollection = Backbone.Collection.extend({
     model: Field,
-
-    initialize: function() {
-      var multiSelect = new Backbone.Picky.MultiSelect(this);
-      _.extend(this, multiSelect);
-    },
   })
 
   var Settings = Backbone.Model.extend({
@@ -102,10 +97,6 @@ $(function() {
     
     render: function() {
       this.$el.html(Mustache.render(this.template, this.model.toJSON()));
-      // if (this.model.selected) {
-      //   this.$('input[type="checkbox"].selector').attr('checked', true);
-      // }
-      
       return this;
     },
   })
