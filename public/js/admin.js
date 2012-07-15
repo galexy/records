@@ -86,6 +86,70 @@ $(function() {
     },
   });
   
+  var EditFieldView = Backbone.View.extend({
+    el: $('#editFieldModal'),
+
+    events: {
+      'click #editFieldCancel'  : 'onCancel',
+      'click #editFieldSubmit'  : 'submit',
+      'submit #editFieldForm'   : 'submit',
+      'shown'                   : 'shown',
+      'hidden'                  : 'onHidden',
+    },
+    
+    initialize: function() {
+      this._modelBinder = new Backbone.ModelBinder();
+
+      this.render();
+      
+      this.model.on('change', this.onChanged, this);
+      
+      this.$el.modal('show');
+      this.processCancel = true;
+    },
+    
+    render: function() {
+      this._modelBinder.bind(this.model, this.el);
+    },
+    
+    shown: function() {
+      this.$('input').first().focus();
+    },
+    
+    onHidden: function() {
+      this._modelBinder.unbind();
+    },
+    
+    onChanged: function() {
+      this.revert || (this.revert = {});
+      
+      for (var field in this.model.changedAttributes()) {
+        if (this.revert.hasOwnProperty(field)) continue;
+        
+        this.revert[field] = this.model.previous(field);
+      }
+    },
+    
+    onCancel: function(e) {
+      this.cancel();
+      this.$el.modal('hide');
+    },
+    
+    cancel: function() {
+      if (this.revert) {
+        this.model.off(null, this.onChanged, this);
+        this.model.set(this.revert);
+      }
+      
+      this.processCancel = false;
+    },
+        
+    submit: function(e) {
+      e.preventDefault();
+      this.$el.modal('hide');
+    },
+  });
+  
   var FieldView = Backbone.View.extend({
     tagName: 'tr',
     
@@ -93,6 +157,7 @@ $(function() {
     
     events: {
       'click .icon-remove'  : 'delete',
+      'click .namefield'    : 'edit',
     },
     
     initialize: function() {
@@ -109,13 +174,20 @@ $(function() {
       e.preventDefault();
       this.model.destroy();
     },
+    
+    edit: function(e) {
+      e.preventDefault();
+      var editView = new EditFieldView({
+        model: this.model
+      });
+    }
   });
   
   var SettingsView = Backbone.View.extend({
     el: $('#admin-view'),
     
     events: {
-      'click #addField'   : 'addField'
+      'click #addField'   : 'addField',
     },
     
     initialize: function() {
