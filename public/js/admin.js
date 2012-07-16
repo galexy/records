@@ -158,6 +158,8 @@ $(function() {
     events: {
       'click .icon-remove'  : 'delete',
       'click .namefield'    : 'edit',
+      'mouseover'           : 'onMouseOver',
+      'mouseleave'          : 'onMouseLeave',
     },
     
     initialize: function() {
@@ -180,6 +182,16 @@ $(function() {
       var editView = new EditFieldView({
         model: this.model
       });
+    },
+    
+    onMouseOver: function(e) {
+      this.$('.icon-remove')
+        .removeClass('invisible');
+    },
+    
+    onMouseLeave: function(e) {
+      this.$('.icon-remove')
+        .addClass('invisible');
     }
   });
   
