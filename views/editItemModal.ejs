@@ -6,18 +6,16 @@
   <div class="modal-body">
     <form class="form-horizontal well" id="editItemForm">
       <fieldset>
-        <% for (field in metadata.fields) { 
-          var fieldMetadata = metadata.fields[field]; %>
-        <div class="control-group">
-            <label class="control-label" for="input01"><%= fieldMetadata.heading %></label>
-            <div class="controls">
-              <input name="<%= field %>"
-                     type="<%= fieldMetadata.formType %>" 
-                     class="input-xlarge"
-                     placeholder="<%= fieldMetadata.placeholder %>"></input>
-            </div>
-        </div>
-        <% } %>
+        <% metadata.fields.forEach(function(field) { %>
+          <div class="control-group">
+              <label class="control-label" for="input01"><%= field.heading %></label>
+              <div class="controls">
+                <input name="<%= field.name %>"
+                        class="input-xlarge"
+                       placeholder="<%= field.placeholder %>"></input>
+              </div>
+          </div>
+        <% }) %>
         <input type="submit" style="visibility:hidden;"></input>
       </fieldset>
     </form>
