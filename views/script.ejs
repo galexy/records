@@ -24,6 +24,7 @@ $(function() {
       var selectable = new Backbone.Picky.Selectable(this);
       _.extend(this, selectable);
     }
+    
   });
 
   var <%= listClassName %> = Backbone.Collection.extend({
@@ -334,5 +335,5 @@ $(function() {
   });
   
   var App = new AppView;
-  
+
 }) 
