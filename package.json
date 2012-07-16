@@ -5,7 +5,8 @@
     "express": "2.5.9",
     "ejs": "0.6.1",
     "mongodb": "1.0.2",
-    "jake": "0.1.21"
+    "jake": "0.1.21",
+    "inflection": "1.2.1"
   },
   "devDependencies": {
     "mocha": "0.7.0"
