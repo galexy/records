@@ -77,9 +77,9 @@ $(function() {
         'hidden'                 : 'onHidden',
       },
     
-      initialize: function() {
+      initialize: function(attributes) {
         this._modelBinder = new Backbone.ModelBinder();
-            
+        this.settings = attributes.settings;
         this.render();
       },
     
@@ -105,7 +105,7 @@ $(function() {
     
       submit: function(e) {
         e.preventDefault();
-        settings.get('fields').add(this.model.clone());
+        this.settings.get('fields').add(this.model.clone());
         this.$el.modal('hide');
       },
     });
@@ -233,7 +233,8 @@ $(function() {
         this._modelBinder = new Backbone.ModelBinder();
       
         this.newFieldView = new NewFieldView({
-          model: new Field
+          model: new Field,
+          settings: this.model,
         });
       
         this.model.get('fields').bind('add', this.onNewField, this);
@@ -263,7 +264,8 @@ $(function() {
       save: function(e) {
         this.model.save({}, {
           success: function(model, response) {
-            
+            var url = window.location.pathname;
+            window.location.href = url.substr(0, url.lastIndexOf('/'));
           },
           
           error: function(model, response) {
