@@ -20,7 +20,18 @@ $(function() {
           required: false,
           default: '',
         }
-      }
+      },
+      
+      initialize: function() {
+        this.bind('change:type', this.updateFormType, this);
+      },
+      
+      updateFormType: function() {
+        var type = this.get('type');
+        if      ('String' == type) this.set('formType', 'text')
+        else if ('Name' == type) this.set('formType', 'text')
+        else if ('Url' == type) this.set('formType', 'url')
+      },
     })
   
     var FieldCollection = Backbone.Collection.extend({
@@ -41,6 +52,15 @@ $(function() {
           this.set('fields', fieldCollection);
         }
       },
+
+      toJSON: function() {
+        return {
+          name: this.get('name'),
+          title: this.get('title'),
+          description: this.get('description'),
+          fields: this.get('fields').toJSON(),
+        }
+      }
     })
   
     /**************************
@@ -204,6 +224,7 @@ $(function() {
     
       events: {
         'click #addField'   : 'addField',
+        'click #save'       : 'save',
       },
     
       initialize: function() {
@@ -238,6 +259,18 @@ $(function() {
       addField: function(e) {
         this.newFieldView.show();
       },
+
+      save: function(e) {
+        this.model.save({}, {
+          success: function(model, response) {
+            
+          },
+          
+          error: function(model, response) {
+            console.log('error')
+          }
+        });
+      }
     })
     
     /**

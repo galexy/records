@@ -35,50 +35,19 @@ app.error(function(err, req, res, next) {
 })
 
 function loadMetadata(req, res, next) {
-  req.metadata = {
-    name: 'passwords',
-    title: 'Passwords',
-    description: 'List of passwords',
+  db.collection('_metadata', function(err, collection) {
+    if (err) return res.send(500);
+    if (!collection) return res.send(500);
     
-    fields: [
-      {
-        name: 'name',
-        heading: 'Name',
-        placeholder: 'Account Name',
-        type: 'Name',
-        formType: 'text',
-        required: true,
-        default: '',
-      },
-      {
-        name: 'url',
-        heading: 'Website',
-        placeholder: 'http://www.someplace.com',
-        type: 'Url',
-        formType: 'url',
-        required: true,
-        default: '',
-      },
-      {
-        name: 'username',
-        heading: 'User Name',
-        placeholder: 'john@doe.com',
-        type: 'String',
-        formType: 'text',
-        required: false,
-      },
-      {
-        name: 'password',
-        heading: 'Password',
-        placeholder: 'password',
-        type: 'String',
-        formType: 'text',
-        required: false,
-      }
-    ]
-  };
-  
-  next();
+    collection.findOne({name: req.params.list}, function(err, metadata) {
+      if (err) return res.send(500);
+      if (!metadata) return res.send(404);
+      
+      req.metadata = metadata;
+      
+      next();
+    })
+  })
 }
 
 /**
@@ -207,17 +176,28 @@ app.delete('/api/lists/:list/:item', function(req, res) {
 })
 
 app.get   ('/api/metadata/lists/:list', loadMetadata, function(req, res) {
+  res.send(req.metadata, {'Content-Type': 'application/json'}, 200);
+})
+
+app.put   ('/api/metadata/lists/:list', function(req, res) {
   db.collection('_metadata', function(err, collection) {
     if (err) return res.send(500);
+    if (!collection) return res.send(500);
     
-    collection.findOne({name: req.params.list}, function(err, doc) {
+    collection.update({name: req.params.list}, {'$set': req.body}, {safe: true}, function(err, count) {
       if (err) return res.send(500);
       
-      if (!doc) return res.send(404);
-      
-      res.send(doc, {'Content-Type': 'application/json'}, 200);
-    });
-  });
+      if (1 == count) {
+        collection.findOne({name: req.params.list}, function(err, doc) {
+          if (err) return res.send(500);
+          return res.send(doc, {'Content-Type': 'application/json'}, 200);
+        })
+      }
+      else {
+        return res.send(404);
+      }
+    })
+  })
 })
 
 var port = process.env['PORT'] || 3000;
