@@ -1,0 +1,35 @@
+#newFieldModal.modal.hide.fade
+  .modal-header
+    button.close(data-dismiss="modal") ×
+    h3 Add new field
+  .modal-body
+    form#newFieldForm.form-horizontal.well
+      fieldset
+        .control-group
+          label.control-label Name:
+          .controls
+            input.input-xlarge(name="name", type="text", placeholder="Field name")
+        .control-group
+          label.control-label Heading:
+          .controls
+            input.input-xlarge(name="heading", type="text", placeholder="Field heading")
+          .control-group
+          label.control-label Type:
+          .controls
+            select(name="type")
+              option(value="String") String
+              option(value="Url") Url
+              option(value="Name") Name
+        .control-group
+          label.control-label Placeholder:
+          .controls
+            input.input-xlarge(name="placeholder", type="text", placeholder="Field placeholder text")
+        .control-group
+          label.control-label Required:
+          .controls
+            input.input-xlarge(name="required", type="checkbox")
+
+        input(type="submit", style="visibility:hidden;")
+  .modal-footer
+    a#addFieldCancel.btn.btn-inverse(href="#") Cancel
+    a#addFieldSubmit.btn.btn-primary.submit(href="#") Add Field
