@@ -1,0 +1,148 @@
+extends layout
+
+block foo
+  title #{metadata.title}
+
+block scripts
+  script(src="/js/list.js")
+  script
+    $(function() {
+      window.Lists.#{metadata.name} = window.Lists.ListModelFactory({});
+      window.Lists.#{metadata.name}Collection = window.Lists.ListCollectionFactory(window.Lists.#{metadata.name}, '/api/lists/#{metadata.name}');
+      var app = new window.Lists.AppView({
+        modelType: window.Lists.#{metadata.name},
+        listType: window.Lists.#{metadata.name}Collection
+      });
+    })
+
+block navbar
+  .navbar.navbar-fixed-top
+    .navbar-inner
+      .container-fluid
+        a.btn.btn-navbar(data-toggle="collapse", data-target=".nav-collapse")
+          span.icon-bar
+          span.icon-bar
+          span.icon-bar
+        a.brand(href="#") Records
+        .nav-collapse
+          ul.nav
+            li: a(href="#") Home
+            li.active: a(href="#") Lists
+            li.divider-vertical
+            li: form.navbar-search.pull-right: input.search-query(type="text", placeholder="Search")
+
+block body
+  ul.breadcrumb(style="width: 100%")
+    li
+      a(href="/") Home 
+      span.divider &gt;
+    li
+      a(href="/lists") Lists
+      span.divider &gt;
+    li
+      a(href="/lists/#{metadata.name}") #{metadata.title}
+      span.divider &gt;
+    li.active Standard
+
+  .container-fluid
+    #listview
+      .row-fluid
+        .span2
+          ul.nav.nav-list
+            li.nav-header Documents
+            li
+              a(href="/documents/insurance")
+                i.icon-file 
+                | Insurance
+            li.nav-header Lists
+            li.active
+              a(href="#")
+                i.icon-book
+                | Passwords
+            li.nav-header Pages
+            li
+              a(href="/pages/master")
+                i.icon-flag
+                | Master List
+
+        .span10
+          .row-fluid
+            .btn-toolbar.span9(style="margin-top: 0; margin-bottom: 0;")
+              .btn-group
+                btn.btn#refresh
+                  i.icon-refresh
+                  | Refresh
+                btn.btn#addItem
+                  i.icon-plus
+                  | New
+                btn.btn.disabled#editItem(disabled)
+                  i.icon-pencil
+                  | Edit
+                btn.btn.disabled#delete(disabled)
+                  i.icon-trash
+                  | Delete
+
+              .btn-group
+                a.btn(href="/lists/#{metadata.name}/admin")
+                  i.icon-wrench
+                  | Configure
+
+          table.table.table-striped.table-condensed
+            thead
+              tr
+                th
+                  input#selectAll(type="checkbox")
+                each field, i in metadata.fields
+                  th
+                    | #{field.heading}
+            tbody
+
+        script#listItemTemplate(type="template")
+          td
+            input.selector(type="checkbox")
+          each field, i in metadata.fields
+            case field.type
+              when 'String': td {{ #{field.name} }}
+              when 'Url': td: a(href="{{ #{field.name} }}"): {{ #{field.name} }}
+              when 'Name': td: a.namefield: {{ #{field.name} }}
+
+    
+    hr
+    
+  // - New Item Modal Dialog
+  #newItemModal.modal.hide.fade
+    .modal-header
+      button.close(data-dismiss="modal") x
+      h3 Add new item
+    .modal-body
+      form#newItemForm.form-horizontal.well
+        fieldset
+          each field, i in metadata.fields
+            .control-group
+              label.control-label(for="#{field.name}") #{field.heading}
+              .controls
+                input.input-xlarge(name="#{field.name}", type="#{field.formType}", placeholder="#{field.placeholder}")
+          input(type="submit", style="visibility:hidden;")
+    .modal-footer
+      a#addItemCancel.btn.btn-inverse(href="#") Cancel
+      a#addItemSubmit.btn.btn-primary.submit(href="#") Add Item
+
+  // - Edit Item Modal Dialog
+  #editItemModal.modal.hide.fade
+    .modal-header
+      button.close(data-dismiss="modal") x
+      h3 Edit item
+
+    .modal-body
+      form#editItemForm.form-horizontal.well
+        fieldset
+          each field, i in metadata.fields
+            .control-group
+              label.control-label #{field.heading}
+              .controls
+                input.input-xlarge(name="#{field.name}", placeholder="#{field.placeholder}")
+          input(type="submit", style="visibility:hidden;")
+
+    .modal-footer
+      a#editItemCancel.btn.btn-inverse(href="#") Cancel
+      a#editItemSubmit.btn.btn-primary.submit(href="#") Update
