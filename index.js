@@ -8,6 +8,7 @@ var inflection = require('inflection');
 var Server = mongo.Server;
 var Db = mongo.Db;
 var ObjectID = mongo.ObjectID;
+var GridStore = mongo.GridStore;
 
 var server = new Server('localhost', 27017, { auto_reconnect: true });
 var db = new Db('records', server);
@@ -36,11 +37,21 @@ app.error(function(err, req, res, next) {
 })
 
 function loadMetadata(req, res, next) {
+  var type, name;
+  if (req.params.hasOwnProperty('list')) {
+    type = 'list';
+    name = req.params.list;
+  }
+  else if (req.params.hasOwnProperty('library')) {
+    type = 'library';
+    name = req.params.library;
+  }
+  
   db.collection('_metadata', function(err, collection) {
     if (err) return res.send(500);
     if (!collection) return res.send(500);
     
-    collection.findOne({name: req.params.list}, function(err, metadata) {
+    collection.findOne({type: type, name: name}, function(err, metadata) {
       if (err) return res.send(500);
       if (!metadata) return res.send(404);
       
@@ -71,8 +82,51 @@ app.get('/lists/:list/admin', loadMetadata, function(req, res) {
   })
 })
 
-/**
+app.get('/docs/:library', loadMetadata, function(req, res) {
+  res.render('library', {
+    library: req.params.library,
+    metadata: req.metadata,
+  });
+})
+
+app.put('/docs/:library/:document', function(req, res) {
+  if (req._body) {
+    console.log('body has been parsed??')
+    console.log(req.body);
+    return res.send(400);
+  }
+  
+  var file = new GridStore(db, req.params.document, 'w', {
+    root: req.params.library, 
+    metadata: {
+      name: req.params.document
+    },
+    chunk_type: req.headers['Content-Type'],
+  });
+  
+  file.open(function(err, file) {
+    if (err) return res.send(500);
+    
+    console.log('file opend')
+    
+    req.on('data', function(chunk) { 
+      file.write(chunk, function(err, file) {}); 
+    });
+    
+    req.on('end', function() { 
+      file.close(function(err, result) {
+        return res.send(200);
+      }); 
+    });
+  })
+})
+
+/***************************************************************************
  * REST API Routes
+ ***************************************************************************/
+ 
+/**
+ * Lists and items API
  */
 app.all   ('/api/lists/:list', function(req, res, next) {
   db.collection(req.params.list, function(err, collection) {
@@ -161,6 +215,13 @@ app.delete('/api/lists/:list/:item', function(req, res) {
       
     return res.send({});
   })
+})
+
+/**
+ * Library and document metadata API
+ */
+app.get   ('/api/docs/:library', function(req, res) {
+  
 })
 
 app.get   ('/api/metadata/lists/:list', loadMetadata, function(req, res) {

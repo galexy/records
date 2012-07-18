@@ -4,7 +4,7 @@
 
 $(function() {
 
-  window.Lists = {};
+  window.Lists = window.Lists || {};
 
   (function(exports) {
 
@@ -61,9 +61,7 @@ $(function() {
 
       render: function() {
         this.$el.html(Mustache.render(this.template, this.model.toJSON()));
-        if (this.model.selected) {
-          this.$('input[type="checkbox"].selector').attr('checked', true);
-        }
+        this.$('input[type="checkbox"].selector').attr('checked', this.model.selected);
 
         return this;
       },

@@ -2,16 +2,16 @@ extends layout
 
 block title
   title #{metadata.title}
-
+  
 block scripts
-  script(src="/js/list.js")
+  script(src="/js/library.js")
   script
     $(function() {
-      window.Lists.#{metadata.name} = window.Lists.ListModelFactory({});
-      window.Lists.#{metadata.name}Collection = window.Lists.ListCollectionFactory(window.Lists.#{metadata.name}, '/api/lists/#{metadata.name}');
-      var app = new window.Lists.AppView({
-        modelType: window.Lists.#{metadata.name},
-        listType: window.Lists.#{metadata.name}Collection
+      window.Libraries.#{metadata.name} = window.Libraries.DocumentModelFactory({});
+      window.Libraries.#{metadata.name}Collection = window.Libraries.DocumentCollectionFactory(window.Libraries.#{metadata.name}, '/api/libraries/#{metadata.name}');
+      var app = new window.Libraries.LibraryView({
+        modelType: window.Libraries.#{metadata.name},
+        collectionType: window.Libraries.#{metadata.name}Collection
       });
     })
 
@@ -45,7 +45,7 @@ block body
     li.active Standard
 
   .container-fluid
-    #listview
+    #libraryview
       .row-fluid
         .span2
           ul.nav.nav-list
@@ -64,7 +64,7 @@ block body
               a(href="/pages/master")
                 i.icon-flag
                 | Master List
-
+        
         .span10
           .row-fluid
             .btn-toolbar.span9(style="margin-top: 0; margin-bottom: 0;")
@@ -97,52 +97,14 @@ block body
                     | #{field.heading}
             tbody
 
-        script#listItemTemplate(type="template")
+        script#documentTemplate(type="template")
           td
             input.selector(type="checkbox")
           each field, i in metadata.fields
             case field.type
               when 'String': td {{ #{field.name} }}
               when 'Url': td: a(href="{{ #{field.name} }}"): {{ #{field.name} }}
-              when 'Name': td: a.namefield: {{ #{field.name} }}
+              when 'Name': td: a(href="/docs/#{metadata.name}/{{ #{field.name} }}"): {{ #{field.name} }}
 
-    
     hr
     
-  // - New Item Modal Dialog
-  #newItemModal.modal.hide.fade
-    .modal-header
-      button.close(data-dismiss="modal") x
-      h3 Add new item
-    .modal-body
-      form#newItemForm.form-horizontal.well
-        fieldset
-          each field, i in metadata.fields
-            .control-group
-              label.control-label(for="#{field.name}") #{field.heading}
-              .controls
-                input.input-xlarge(name="#{field.name}", type="#{field.formType}", placeholder="#{field.placeholder}")
-          input(type="submit", style="visibility:hidden;")
-    .modal-footer
-      a#addItemCancel.btn.btn-inverse(href="#") Cancel
-      a#addItemSubmit.btn.btn-primary.submit(href="#") Add Item
-
-  // - Edit Item Modal Dialog
-  #editItemModal.modal.hide.fade
-    .modal-header
-      button.close(data-dismiss="modal") x
-      h3 Edit item
-
-    .modal-body
-      form#editItemForm.form-horizontal.well
-        fieldset
-          each field, i in metadata.fields
-            .control-group
-              label.control-label #{field.heading}
-              .controls
-                input.input-xlarge(name="#{field.name}", placeholder="#{field.placeholder}")
-          input(type="submit", style="visibility:hidden;")
-
-    .modal-footer
-      a#editItemCancel.btn.btn-inverse(href="#") Cancel
-      a#editItemSubmit.btn.btn-primary.submit(href="#") Update
