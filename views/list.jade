@@ -4,7 +4,16 @@ block foo
   title #{metadata.title}
 
 block scripts
-  script(src="/lists/#{list}/script.js")
+  script(src="/js/list.js")
+  script
+    $(function() {
+      window.Lists.#{metadata.name} = window.Lists.ListModelFactory({});
+      window.Lists.#{metadata.name}Collection = window.Lists.ListCollectionFactory(window.Lists.#{metadata.name}, '/api/lists/#{metadata.name}');
+      var app = new window.Lists.AppView({
+        modelType: window.Lists.#{metadata.name},
+        listType: window.Lists.#{metadata.name}Collection
+      });
+    })
 
 block navbar
   .navbar.navbar-fixed-top
@@ -17,13 +26,10 @@ block navbar
         a.brand(href="#") Records
         .nav-collapse
           ul.nav
-            li
-              a(href="#") Home
-            li.active
-              a(href="#") Lists
+            li: a(href="#") Home
+            li.active: a(href="#") Lists
             li.divider-vertical
-              form.navbar-search.pull-right
-                input.search-query(type="text", placeholder="Search")
+            li: form.navbar-search.pull-right: input.search-query(type="text", placeholder="Search")
 
 block body
   ul.breadcrumb(style="width: 100%")
@@ -39,7 +45,7 @@ block body
     li.active Standard
 
   .container-fluid
-    .listview
+    #listview
       .row-fluid
         .span2
           ul.nav.nav-list
@@ -96,17 +102,46 @@ block body
             input.selector(type="checkbox")
           each field, i in metadata.fields
             case field.type
-              when 'String'
-                  td
-                    | {{ #{field.name} }}
-              when 'Url'
-                  td
-                    a(href="{{ #{field.name} }}"): {{ #{field.name} }}
-              when 'Name'
-                  td
-                    a.namefield: {{ #{field.name} }}
+              when 'String': td {{ #{field.name} }}
+              when 'Url': td: a(href="{{ #{field.name} }}"): {{ #{field.name} }}
+              when 'Name': td: a.namefield: {{ #{field.name} }}
 
-//      <%- partial('newItemModal.ejs') %>
-//      <%- partial('editItemModal.ejs') %>
+    // - New Item Modal Dialog
+    #newItemModal.modal.hide.fade
+      .modal-header
+        button.close(data-dismiss="modal") x
+        h3 Add new item
+      .modal-body
+        form#newItemForm.form-horizontal.well
+          fieldset
+            each field, i in metadata.fields
+              .control-group
+                label.control-label(for="#{field.name}") #{field.heading}
+                .controls
+                  input.input-xlarge(name="#{field.name}", type="#{field.formType}", placeholder="#{field.placeholder}")
+            input(type="submit", style="visibility:hidden;")
+      .modal-footer
+        a#addItemCancel.btn.btn-inverse(href="#") Cancel
+        a#addItemSubmit.btn.btn-primary.submit(href="#") Add Item
+
+    // - Edit Item Modal Dialog
+    #editItemModal.modal.hide.fade
+      .modal-header
+        button.close(data-dismiss="modal") x
+        h3 Edit item
+
+      .modal-body
+        form#editItemForm.form-horizontal.well
+          fieldset
+            each field, i in metadata.fields
+              .control-group
+                label.control-label #{field.heading}
+                .controls
+                  input.input-xlarge(name="#{field.name}", placeholder="#{field.placeholder}")
+            input(type="submit", style="visibility:hidden;")
+
+      .modal-footer
+        a#editItemCancel.btn.btn-inverse(href="#") Cancel
+        a#editItemSubmit.btn.btn-primary.submit(href="#") Update
 
     hr

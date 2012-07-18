@@ -61,18 +61,6 @@ app.get('/lists/:list', loadMetadata, function(req, res) {
   });
 })
 
-app.get('/lists/:list/script.js', loadMetadata, function(req, res) { 
-  var baseClassName = inflection.classify(req.metadata.name);
-  
-  res.contentType('js');
-  res.render('script', { 
-    list: req.params.list, 
-    metadata: req.metadata,
-    modelClassName: baseClassName,
-    listClassName: baseClassName + 'List',    
-  });
-})
-
 /**
  * List Admin View
  */
