@@ -26,7 +26,8 @@ app.configure(function () {
   app.use(express.static(__dirname + '/public'));
 });
 
-app.set('view engine', 'ejs')
+app.set('view engine', 'jade')
+app.set('view options', {layout: false});
 
 app.error(function(err, req, res, next) {
   console.log(err);
@@ -65,7 +66,6 @@ app.get('/lists/:list/script.js', loadMetadata, function(req, res) {
   
   res.contentType('js');
   res.render('script', { 
-    layout: false, 
     list: req.params.list, 
     metadata: req.metadata,
     modelClassName: baseClassName,
