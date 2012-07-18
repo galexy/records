@@ -1,0 +1,189 @@
+extends layout
+
+block title
+  title= metadata.title + ' - Settings'
+  
+block scripts
+  script(src="/js/admin.js")
+  script
+    $(function() { 
+      var settingsView = new Admin.SettingsView({ 
+        model: new Admin.Settings(!{JSON.stringify(metadata)})
+      }); 
+    })
+
+block navbar
+  .navbar.navbar-fixed-top
+    .navbar-inner
+      .container-fluid
+        a.btn.btn-navbar(data-toggle="collapse", data-target=".nav-collapse")
+          span.icon-bar
+          span.icon-bar
+          span.icon-bar
+        a.brand(href="#") Records
+        .nav-collapse
+          ul.nav
+            li: a(href="#") Home
+            li.active: a(href="#") Lists
+            li.divider-vertical
+            li: form.navbar-search.pull-right: input.search-query(type="text", placeholder="Search")
+
+block body
+  ul.breadcrumb(style="width: 100%")
+    li
+      a(href="/") Home
+      span.divider &gt;
+    li
+      a(href="/lists") Lists
+      span.divider &gt;
+    li
+      a(href="/lists/#{list}")#{metadata.title}
+      span.divider &gt;
+    li.active Configuration
+
+  .container-fluid
+    #admin-view
+      .row-fluid
+        .span2
+          ul.nav.nav-list
+            li.nav-header Documents
+            li
+              a(href="/documents/insurance")
+                i.icon-file 
+                | Insurance
+            li.nav-header Lists
+            li.active
+              a(href="#")
+                i.icon-book
+                | Passwords
+            li.nav-header Pages
+            li
+              a(href="/pages/master")
+                i.icon-flag
+                | Master List
+
+        .span10
+          .btn-toolbar.span9(style="margin-top: 0; margin-bottom: 0;")
+            .btn-group
+              btn#addField.btn
+                i.icon-plus
+                | New Column
+              btn#save.btn
+                i.icon-hdd
+                | Save
+
+          .row-fluid
+            form#details.form-horizontal
+              legend List details
+              .control-group
+                label.control-label(for="name") Name:
+                .controls
+                  input#name.input-xlarge(name="name", type="text")
+              .control-group
+                label.control-label(for="title") Title:
+                .controls
+                  input#title.input-xlarge(name="title", type="text")
+              .control-group
+                label.control-label(for="description") Description:
+                .controls
+                  input#description(name="description", type="textarea")
+
+          legend Fields
+          
+          table.table.table-striped.table-condensed
+            thead
+              tr
+                th
+                th Name
+                th Heading
+                th Type
+                th Place Holder
+                th Required
+                th Default
+            tbody
+
+        script#fieldTemplate(type="template")
+          td: i.icon-remove.invisible
+          td: a.namefield {{name}}
+          td {{heading}}
+          td {{type}}
+          td {{placeholder}}
+          td {{required}}
+          td {{default}}
+
+  hr
+
+  #newFieldModal.modal.hide.fade
+    .modal-header
+      button.close(data-dismiss="modal") x
+      h3 Add new field
+
+    .modal-body
+      form#newFieldForm.form-horizontal.well
+        fieldset
+          .control-group
+            label.control-label Name:
+            .controls
+              input.input-xlarge(name="name", type="text", placeholder="Field name")
+          .control-group
+            label.control-label Heading:
+            .controls
+              input.input-xlarge(name="heading", type="text", placeholder="Field heading")
+          .control-group
+            label.control-label Type:
+            .controls
+              select(name="type")
+                option(value="String") String
+                option(value="Url")Url
+                option(value="Name")Name
+          .control-group
+            label.control-label Placeholder:
+            .controls
+              input.input-xlarge(name="placeholder", type="text", placeholder="Field placeholder text")
+          .control-group
+            label.control-label Required:
+            .controls
+              input.input-xlarge(name="required", type="checkbox")
+
+          input(type="submit", style="visibility:hidden;")
+
+    .modal-footer
+      a#addFieldCancel.btn.btn-inverse(href="#") Cancel
+      a#addFieldSubmit.btn.btn-primary(href="#") Add Field
+
+
+  #editFieldModal.modal.hide.fade
+    .modal-header
+      button.close(data-dismiss="modal") ×
+      h3 Edit field
+    .modal-body
+      form#editFieldForm.form-horizontal.well
+        fieldset
+          .control-group
+            label.control-label Name:
+            .controls
+              input.input-xlarge(name="name", type="text", placeholder="Field name")
+          .control-group
+            label.control-label Heading:
+            .controls
+              input.input-xlarge(name="heading", type="text", placeholder="Field heading")
+          .control-group
+            label.control-label Type:
+            .controls
+              select(name="type")
+                option(value="String") String
+                option(value="Url") Url
+                option(value="Name") Name
+          .control-group
+            label.control-label Placeholder:
+            .controls
+              input.input-xlarge(name="placeholder", type="text", placeholder="Field placeholder text")
+          .control-group
+            label.control-label Required:
+            .controls
+              input.input-xlarge(name="required", type="checkbox")
+
+          input(type="submit", style="visibility:hidden;")
+    .modal-footer
+      a#editFieldCancel.btn.btn-inverse(href="#") Cancel
+      a#editFieldSubmit.btn.btn-primary(href="#") Update
