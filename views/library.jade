@@ -73,7 +73,7 @@ block body
                 btn.btn#refresh
                   i.icon-refresh
                   | Refresh
-                btn.btn#addItem
+                btn.btn#addDocument
                   i.icon-plus
                   | New
                 btn.btn.disabled#editItem(disabled)
@@ -84,7 +84,7 @@ block body
                   | Delete
 
               .btn-group
-                a.btn(href="/lists/#{metadata.name}/admin")
+                a.btn(href="/docs/#{metadata.name}/admin")
                   i.icon-wrench
                   | Configure
 
@@ -109,3 +109,25 @@ block body
 
     hr
     
+    // - New Document Modal Dialog
+    #newDocumentModal.modal.hide.fade
+      .modal-header
+        button.close(data-dismiss="modal") x
+        h3 Add new document
+      .modal-body
+        form#newDocumentForm.form-horizontal.well
+          fieldset
+            .control-group
+              label.control-label(for="_file") File
+              .controls
+                input.input-xlarge(name="_file", type="file")
+            each field, i in metadata.fields
+              .control-group
+                label.control-label(for="#{field.name}") #{field.heading}
+                .controls
+                  input.input-xlarge(name="#{field.name}", type="#{field.formType}", placeholder="#{field.placeholder}")
+            input(type="submit", style="visibility:hidden;")
+      .modal-footer
+        a#addDocumentCancel.btn.btn-inverse(href="#") Cancel
+        a#addDocumentSubmit.btn.btn-primary.submit(href="#") Add Item
+  

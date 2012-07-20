@@ -295,7 +295,7 @@ app.get   ('/api/libraries/:library/:document', function(req, res) {
   db.collection(req.params.library + '.files', function(err, collection) {
     if (err) return res.send(500);
     
-    collection.findOne({filename: req.params.document}, function(err, document) {
+    collection.findOne({"metadata.name": req.params.document}, function(err, document) {
       if (err) return res.send(500);
       
       if (!document) return res.send(404);
@@ -311,11 +311,11 @@ app.put   ('/api/libraries/:library/:document', function(req, res) {
   db.collection(req.params.library + '.files', function(err, collection) {
     if (err) return res.send(500);
     
-    collection.update({filename: req.params.document}, {'$set': {metadata: req.body}}, {safe: true}, function(err, count) {
+    collection.update({"metadata.name": req.params.document}, {'$set': {metadata: req.body}}, {safe: true}, function(err, count) {
       if (err) return res.send(500);
       
       if (1 == count) {
-        collection.findOne({filename: req.params.document}, function(err, doc) {
+        collection.findOne({"metadata.name": req.params.document}, function(err, doc) {
           if (err) return res.send(500);
           return res.json(doc.metadata);
         })
