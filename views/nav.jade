@@ -1,0 +1,59 @@
+extends layout
+
+block navbar
+  .navbar.navbar-fixed-top
+    .navbar-inner
+      .container-fluid
+        a.btn.btn-navbar(data-toggle="collapse", data-target=".nav-collapse")
+          span.icon-bar
+          span.icon-bar
+          span.icon-bar
+        a.brand(href="/") Records
+        .nav-collapse
+          ul.nav
+            li: a(href="/") Home
+            li
+              a(href="/docs") Documents
+            li.active
+              a(href="/lists") Lists
+            li
+              a(href="/pages") Pages
+            li.divider-vertical
+            li: form.navbar-search.pull-right: input.search-query(type="text", placeholder="Search")
+            
+block breadcrumb
+  ul.breadcrumb(style="width: 100%")
+    li
+      a(href="/") Home
+      span.divider &gt;
+    for step in nav.steps
+      if step.active
+        li.active #{step.title}
+      else
+        li
+          a(href="#{step.url}") #{step.title}
+          span.divider &gt;
+  
+block sidenav
+  ul.nav.nav-list
+    li.nav-header
+      a(href="/docs") Documents
+    for library in nav.libraries
+      li(class=library.active ? ["active"] : [])
+        a(href="/docs/#{library.name}")
+          i.icon-file
+          | #{library.title}
+    li.nav-header
+      a(href="/lists") Lists
+    for list in nav.lists
+      li(class=list.active ? ["active"] : [])
+        a(href="/lists/#{list.name}")
+          i.icon-book
+          | #{list.title}
+    li.nav-header
+      a(href="/pages") Pages
+      for page in nav.pages
+        li(class=page.active ? ["active"] : [])
+          a(href="/pages/#{page.name}")
+            i.icon-book
+            | #{page.title}

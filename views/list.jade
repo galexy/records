@@ -1,4 +1,4 @@
-extends layout
+extends nav
 
 block title
   title #{metadata.title}
@@ -15,100 +15,49 @@ block scripts
       });
     })
 
-block navbar
-  .navbar.navbar-fixed-top
-    .navbar-inner
-      .container-fluid
-        a.btn.btn-navbar(data-toggle="collapse", data-target=".nav-collapse")
-          span.icon-bar
-          span.icon-bar
-          span.icon-bar
-        a.brand(href="#") Records
-        .nav-collapse
-          ul.nav
-            li: a(href="#") Home
-            li.active: a(href="#") Lists
-            li.divider-vertical
-            li: form.navbar-search.pull-right: input.search-query(type="text", placeholder="Search")
+block content
+  .row-fluid
+    .btn-toolbar.span9(style="margin-top: 0; margin-bottom: 0;")
+      .btn-group
+        btn.btn#refresh
+          i.icon-refresh
+          | Refresh
+        btn.btn#addItem
+          i.icon-plus
+          | New
+        btn.btn.disabled#editItem(disabled)
+          i.icon-pencil
+          | Edit
+        btn.btn.disabled#delete(disabled)
+          i.icon-trash
+          | Delete
 
-block body
-  ul.breadcrumb(style="width: 100%")
-    li
-      a(href="/") Home 
-      span.divider &gt;
-    li
-      a(href="/lists") Lists
-      span.divider &gt;
-    li
-      a(href="/lists/#{metadata.name}") #{metadata.title}
-      span.divider &gt;
-    li.active Standard
+      .btn-group
+        a.btn(href="/admin/lists/#{metadata.name}")
+          i.icon-wrench
+          | Configure
 
-  .container-fluid
-    #listview
-      .row-fluid
-        .span2
-          ul.nav.nav-list
-            li.nav-header Documents
-            li
-              a(href="/documents/insurance")
-                i.icon-file 
-                | Insurance
-            li.nav-header Lists
-            li.active
-              a(href="#")
-                i.icon-book
-                | Passwords
-            li.nav-header Pages
-            li
-              a(href="/pages/master")
-                i.icon-flag
-                | Master List
+  table.table.table-striped.table-condensed
+    thead
+      tr
+        th
+          input#selectAll(type="checkbox")
+        each field, i in metadata.fields
+          th
+            | #{field.heading}
+    tbody
 
-        .span10
-          .row-fluid
-            .btn-toolbar.span9(style="margin-top: 0; margin-bottom: 0;")
-              .btn-group
-                btn.btn#refresh
-                  i.icon-refresh
-                  | Refresh
-                btn.btn#addItem
-                  i.icon-plus
-                  | New
-                btn.btn.disabled#editItem(disabled)
-                  i.icon-pencil
-                  | Edit
-                btn.btn.disabled#delete(disabled)
-                  i.icon-trash
-                  | Delete
+  script#listItemTemplate(type="template")
+    td
+      input.selector(type="checkbox")
+    each field, i in metadata.fields
+      case field.type
+        when 'String': td {{ #{field.name} }}
+        when 'Url': td: a(href="{{ #{field.name} }}"): {{ #{field.name} }}
+        when 'Name': td: a.namefield: {{ #{field.name} }}
+  hr
 
-              .btn-group
-                a.btn(href="/admin/lists/#{metadata.name}")
-                  i.icon-wrench
-                  | Configure
-
-          table.table.table-striped.table-condensed
-            thead
-              tr
-                th
-                  input#selectAll(type="checkbox")
-                each field, i in metadata.fields
-                  th
-                    | #{field.heading}
-            tbody
-
-        script#listItemTemplate(type="template")
-          td
-            input.selector(type="checkbox")
-          each field, i in metadata.fields
-            case field.type
-              when 'String': td {{ #{field.name} }}
-              when 'Url': td: a(href="{{ #{field.name} }}"): {{ #{field.name} }}
-              when 'Name': td: a.namefield: {{ #{field.name} }}
-
-    
-    hr
-    
+block modal
   // - New Item Modal Dialog
   #newItemModal.modal.hide.fade
     .modal-header

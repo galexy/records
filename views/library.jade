@@ -1,4 +1,4 @@
-extends layout
+extends nav
 
 block title
   title #{metadata.title}
@@ -15,138 +15,88 @@ block scripts
       });
     })
 
-block navbar
-  .navbar.navbar-fixed-top
-    .navbar-inner
-      .container-fluid
-        a.btn.btn-navbar(data-toggle="collapse", data-target=".nav-collapse")
-          span.icon-bar
-          span.icon-bar
-          span.icon-bar
-        a.brand(href="#") Records
-        .nav-collapse
-          ul.nav
-            li: a(href="#") Home
-            li.active: a(href="#") Lists
-            li.divider-vertical
-            li: form.navbar-search.pull-right: input.search-query(type="text", placeholder="Search")
+block content
+  .row-fluid
+    .btn-toolbar.span9(style="margin-top: 0; margin-bottom: 0;")
+      .btn-group
+        btn.btn#refresh
+          i.icon-refresh
+          | Refresh
+        btn.btn#addDocument
+          i.icon-plus
+          | New
+        btn.btn.disabled#editDocument(disabled)
+          i.icon-pencil
+          | Edit
+        btn.btn.disabled#delete(disabled)
+          i.icon-trash
+          | Delete
 
-block body
-  ul.breadcrumb(style="width: 100%")
-    li
-      a(href="/") Home 
-      span.divider &gt;
-    li
-      a(href="/lists") Lists
-      span.divider &gt;
-    li
-      a(href="/lists/#{metadata.name}") #{metadata.title}
-      span.divider &gt;
-    li.active Standard
+      .btn-group
+        a.btn(href="/admin/docs/#{metadata.name}")
+          i.icon-wrench
+          | Configure
 
-  .container-fluid
-    #libraryview
-      .row-fluid
-        .span2
-          ul.nav.nav-list
-            li.nav-header 
-              a(href="/docs") Documents
-            li.active
-              a(href="/docs/records")
-                i.icon-file 
-                | Records
-            li.nav-header Lists
-            li
-              a(href="#")
-                i.icon-book
-                | Passwords
-            li.nav-header Pages
-            li
-              a(href="/pages/master")
-                i.icon-flag
-                | Master List
-        
-        .span10
-          .row-fluid
-            .btn-toolbar.span9(style="margin-top: 0; margin-bottom: 0;")
-              .btn-group
-                btn.btn#refresh
-                  i.icon-refresh
-                  | Refresh
-                btn.btn#addDocument
-                  i.icon-plus
-                  | New
-                btn.btn.disabled#editDocument(disabled)
-                  i.icon-pencil
-                  | Edit
-                btn.btn.disabled#delete(disabled)
-                  i.icon-trash
-                  | Delete
+  table.table.table-striped.table-condensed
+    thead
+      tr
+        th
+          input#selectAll(type="checkbox")
+        each field, i in metadata.fields
+          th
+            | #{field.heading}
+    tbody
 
-              .btn-group
-                a.btn(href="/admin/docs/#{metadata.name}")
-                  i.icon-wrench
-                  | Configure
+  script#documentTemplate(type="template")
+    td
+      input.selector(type="checkbox")
+    each field, i in metadata.fields
+      case field.type
+        when 'String': td {{ #{field.name} }}
+        when 'Url': td: a(href="{{ #{field.name} }}"): {{ #{field.name} }}
+        when 'Name': td: a.namefield(href="/docs/#{metadata.name}/{{ #{field.name} }}"): {{ #{field.name} }}
 
-          table.table.table-striped.table-condensed
-            thead
-              tr
-                th
-                  input#selectAll(type="checkbox")
-                each field, i in metadata.fields
-                  th
-                    | #{field.heading}
-            tbody
+  hr
 
-        script#documentTemplate(type="template")
-          td
-            input.selector(type="checkbox")
+block modal
+  // - New Document Modal Dialog
+  #newDocumentModal.modal.hide.fade
+    .modal-header
+      button.close(data-dismiss="modal") x
+      h3 Add new document
+    .modal-body
+      form#newDocumentForm.form-horizontal.well
+        fieldset
+          .control-group
+            label.control-label File
+            .controls
+              input.input-xlarge(type="file")
           each field, i in metadata.fields
-            case field.type
-              when 'String': td {{ #{field.name} }}
-              when 'Url': td: a(href="{{ #{field.name} }}"): {{ #{field.name} }}
-              when 'Name': td: a.namefield(href="/docs/#{metadata.name}/{{ #{field.name} }}"): {{ #{field.name} }}
-
-    hr
-    
-    // - New Document Modal Dialog
-    #newDocumentModal.modal.hide.fade
-      .modal-header
-        button.close(data-dismiss="modal") x
-        h3 Add new document
-      .modal-body
-        form#newDocumentForm.form-horizontal.well
-          fieldset
             .control-group
-              label.control-label File
+              label.control-label(for="#{field.name}") #{field.heading}
               .controls
-                input.input-xlarge(type="file")
-            each field, i in metadata.fields
-              .control-group
-                label.control-label(for="#{field.name}") #{field.heading}
-                .controls
-                  input.input-xlarge(name="#{field.name}", type="#{field.formType}", placeholder="#{field.placeholder}")
-            input(type="submit", style="visibility:hidden;")
-      .modal-footer
-        a#addDocumentCancel.btn.btn-inverse(href="#") Cancel
-        a#addDocumentSubmit.btn.btn-primary.submit(href="#") Add Item
-  
-    // - Edit Document Modal Dialog
-    #editDocumentModal.modal.hide.fade
-      .modal-header
-        button.close(data-dismiss="modal") x
-        h3 Edit document
+                input.input-xlarge(name="#{field.name}", type="#{field.formType}", placeholder="#{field.placeholder}")
+          input(type="submit", style="visibility:hidden;")
+    .modal-footer
+      a#addDocumentCancel.btn.btn-inverse(href="#") Cancel
+      a#addDocumentSubmit.btn.btn-primary.submit(href="#") Add Item
 
-      .modal-body
-        form#editDocumentForm.form-horizontal.well
-          fieldset
-            each field, i in metadata.fields
-              .control-group
-                label.control-label #{field.heading}
-                .controls
-                  input.input-xlarge(name="#{field.name}", placeholder="#{field.placeholder}", disabled=(field.type == 'Name'))
-            input(type="submit", style="visibility:hidden;")
+  // - Edit Document Modal Dialog
+  #editDocumentModal.modal.hide.fade
+    .modal-header
+      button.close(data-dismiss="modal") x
+      h3 Edit document
 
-      .modal-footer
-        a#editDocumentCancel.btn.btn-inverse(href="#") Cancel
-        a#editDocumentSubmit.btn.btn-primary.submit(href="#") Update
+    .modal-body
+      form#editDocumentForm.form-horizontal.well
+        fieldset
+          each field, i in metadata.fields
+            .control-group
+              label.control-label #{field.heading}
+              .controls
+                input.input-xlarge(name="#{field.name}", placeholder="#{field.placeholder}", disabled=(field.type == 'Name'))
+          input(type="submit", style="visibility:hidden;")
+
+    .modal-footer
+      a#editDocumentCancel.btn.btn-inverse(href="#") Cancel
+      a#editDocumentSubmit.btn.btn-primary.submit(href="#") Update
