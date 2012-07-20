@@ -1,33 +1,28 @@
-/* Author:
-
-*/
-
 $(function() {
-
-  window.Lists = window.Lists || {};
-
+  
+  window.Libraries = window.Libraries || {};
+  
   (function(exports) {
-
-    /**************************
-     * Model Factory
-     **************************/
-
-    exports.ListModelFactory = function(defaultValues) {
+    
+    /**
+     * Model Factories
+     */
+    exports.DocumentModelFactory = function(defaultValues) {
       return Backbone.Model.extend({
         defaults: function() {
           return defaultValues;
         },
         
-        idAttribute: '_id',
+        idAttribute: 'name',
         
         initialize: function() {
           var selectable = new Backbone.Picky.Selectable(this);
           _.extend(this, selectable);
-        }
-      })
+        },
+      });
     };
     
-    exports.ListCollectionFactory = function(Model, url) {
+    exports.DocumentCollectionFactory = function(Model, url) {
       return Backbone.Collection.extend({
         model: Model,
 
@@ -39,17 +34,16 @@ $(function() {
         }
       });
     };
-
-    exports.ItemView = Backbone.View.extend({
-
+    
+    exports.DocumentView = Backbone.View.extend({
       tagName: 'tr',
-
-      template: $('#listItemTemplate').text(),
-
+      
+      template: $('#documentTemplate').text(),
+      
       events: {
         'click input[type="checkbox"].selector' : 'select',
-        'click .namefield'                      : 'edit',
         'click'                                 : 'select',
+        'click .namefield'                      : 'nameclick',
       },
 
       initialize: function() {
@@ -65,44 +59,42 @@ $(function() {
 
         return this;
       },
-
+      
       select: function(e) {
         e.stopPropagation();
         this.model.toggleSelected();
       },
-
-      edit: function(e) {
-        e.preventDefault();
+      
+      nameclick: function(e) {
         e.stopPropagation();
-        var editView = new Lists.EditItemView({
-          model: this.model
-        });
       },
-
+      
       selected: function(e) {
         this.$('input[type="checkbox"].selector').attr('checked', true);
       },
 
       deselected: function(e) {
         this.$('input[type="checkbox"].selector').attr('checked', false);
-      },
+      },      
     });
-
-    exports.NewItemView = Backbone.View.extend({
-      el: $('#newItemModal'),
+    
+    exports.NewDocumentView = Backbone.View.extend({
+      el: $('#newDocumentModal'),
 
       events: {
-        'click #addItemCancel'  : 'cancel',
-        'click #addItemSubmit'  : 'submit',
-        'submit #newItemForm'   : 'submit',
-        'shown'                 : 'shown',
-        'hidden'                : 'onHidden',
+        'click #addDocumentCancel'  : 'cancel',
+        'click #addDocumentSubmit'  : 'submit',
+        'submit #newDocumentForm'   : 'submit',
+        'shown'                     : 'shown',
+        'hidden'                    : 'onHidden',
+        'change input[type="file"]' : 'fileChange'
       },
 
       initialize: function(attributes) {
         this._modelBinder = new Backbone.ModelBinder();
-        this.list = attributes.list;
+        this.library = attributes.library;
         this.render();
+        this.fileInput = this.$('input[type="file"]').get(0);
       },
 
       render: function() {
@@ -119,6 +111,12 @@ $(function() {
 
       onHidden: function() {
         this.model.set(this.model.defaults());
+        this.fileInput.value = '';
+      },
+      
+      fileChange: function(e) {
+        var file = this.fileInput.files[0];
+        this.model.set('name', file.fileName);
       },
 
       cancel: function(e) {
@@ -126,21 +124,39 @@ $(function() {
       },
 
       submit: function(e) {
+        var self = this;
+        
         e.preventDefault();
-        this.list.create(this.model.toJSON());
-        this.$el.modal('hide');
+        
+        var file = this.$("input[type='file']")[0].files[0];
+        var fileName = this.model.get('name');
+        
+        var xhr = new XMLHttpRequest();
+        xhr.open('PUT', '/docs/records/' + fileName, true);
+        xhr.setRequestHeader("Content-Type", file.type);
+        xhr.onload = function(e) {
+          if (this.status == 200) {
+            console.log(this.response);
+
+            var newModelJson = self.model.toJSON();
+            delete newModelJson._file;
+            self.library.create(newModelJson);
+            self.$el.modal('hide');
+          }
+        };
+        xhr.send(file);
       },
     });
     
-    exports.EditItemView = Backbone.View.extend({
-      el: $('#editItemModal'),
+    exports.EditDocumentView = Backbone.View.extend({
+      el: $('#editDocumentModal'),
 
       events: {
-        'shown'                   : 'onShown',
-        'hide'                    : 'onHide',
-        'click #editItemCancel'   : 'onCancel',
-        'click #editItemSubmit'   : 'submit',
-        'submit #editItemForm'    : 'submit',
+        'shown'                       : 'onShown',
+        'hide'                        : 'onHide',
+        'click #editDocumentCancel'   : 'onCancel',
+        'click #editDocumentSubmit'   : 'submit',
+        'submit #editDocumentForm'    : 'submit',
       },
 
       initialize: function() {
@@ -206,79 +222,61 @@ $(function() {
       }
     });
     
-    exports.AppView = Backbone.View.extend({
-      el: $('#listview'),
+    exports.LibraryView = Backbone.View.extend({
+      el: $('#libraryview'),
 
       events: {
-        'click #refresh'        : 'refresh',
-        'click #addItem'        : 'addNewItem',
-        'click #delete'         : 'delete',
-        'click #selectAll'      : 'toggleSelectAll',
-        'click #editItem'       : 'editItem',
+        'click #addDocument'        : 'addNewDocument',
+        'click #editDocument'       : 'editDocument',
       },
-
+      
       initialize: function(attributes) {
+        this.library = new attributes.collectionType;
         
-        this.list = new attributes.listType;
-
         this.table = this.$('tbody');
-
-        this.newItemView = new Lists.NewItemView({
+        
+        this.newDocumentView = new exports.NewDocumentView({
           model: new attributes.modelType,
-          list: this.list,
-        });
+          library: this.library,
+        })
+        
+        this.library.on('add', this.addOne, this);
+        this.library.on('reset', this.addAll, this);
+        this.library.on('all', this.render, this);
+        this.library.on('select:some', this.selectedSome, this);
+        this.library.on('select:all', this.selectedAll, this);
+        this.library.on('select:none', this.deselected, this);
 
-        // bind model events
-        this.list.on('add', this.addOne, this);
-        this.list.on('reset', this.addAll, this);
-        this.list.on('all', this.render, this);
-        this.list.on('select:some', this.selectedSome, this);
-        this.list.on('select:all', this.selectedAll, this);
-        this.list.on('select:none', this.deselected, this);
-
-        this.list.fetch();
+        this.library.fetch();
       },
-
+      
       render: function() {
         return this;
       },
-
-      refresh: function(e) {
-
+      
+      addNewDocument: function() {
+        this.newDocumentView.show();
       },
-
-      addNewItem: function(e) {
-        this.newItemView.show();
-      },
-
-      delete: function(e) {
-        // TODO: pop up a confirmation dialog
-        for(var i in this.list.selected) {
-          var selected = this.list.selected[i];
-          selected.deselect();
-          selected.destroy({wait: true});
-        }
-      },
-
-      editItem: function(e) {
-        for (var i in this.list.selected) {
-          var editView = new Lists.EditItemView({
-            model: this.list.selected[i]
+      
+      editDocument: function() {
+        for (var i in this.library.selected) {
+          var editView = new exports.EditDocumentView({
+            model: this.library.selected[i]
           });
         }
       },
 
       addOne: function(item) {
-        var view = new Lists.ItemView({
+        var view = new exports.DocumentView({
           model: item
         });
         this.table.append(view.render().el);
       },
 
       addAll: function() {
-        this.list.each($.proxy(this.addOne, this));
+        this.library.each($.proxy(this.addOne, this));
       },
-
+      
       enableDeleteButton: function() {
         this.$('#delete')
           .removeClass('disabled')
@@ -292,20 +290,20 @@ $(function() {
       },
 
       enableEditButton: function() {
-        this.$('#editItem')
+        this.$('#editDocument')
           .removeClass('disabled')
           .removeAttr('disabled');
       },
 
       disableEditButton: function() {
-        this.$('#editItem')
+        this.$('#editDocument')
           .addClass('disabled')
           .attr('disabled', 'disabled');
       },
 
       selectedSome: function(e) {
         this.enableDeleteButton();
-        if (this.list.selectedLength == 1) {
+        if (this.library.selectedLength == 1) {
           this.enableEditButton();
         }
         else {
@@ -315,7 +313,7 @@ $(function() {
 
       selectedAll: function(e) {
         this.enableDeleteButton();
-        if (this.list.selectedLength == 1) {
+        if (this.library.selectedLength == 1) {
           this.enableEditButton();
         }
         else {
@@ -329,9 +327,11 @@ $(function() {
       },
 
       toggleSelectAll: function(e) {
-        this.list.toggleSelectAll();
-      }
+        this.library.toggleSelectAll();
+      }      
     });
-
-  })(window.Lists);
-}) 
+    
+    
+  })(window.Libraries);
+  
+})
