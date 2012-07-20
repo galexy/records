@@ -9,7 +9,6 @@ block scripts
     $(function() { 
       var settingsView = new Admin.SettingsView({ 
         model: new Admin.Settings(!{JSON.stringify(metadata)}),
-        type: '#{type}',
       }); 
     })
 

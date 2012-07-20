@@ -28,6 +28,8 @@ app.configure(function () {
     keepExtensions: true, 
     uploadDir: __dirname + "/public/uploads"
   }));
+  app.use(express.staticCache());
+  app.use(express.compress());
   app.use(express.static(__dirname + '/public'));
 });
 
@@ -72,11 +74,62 @@ function loadMetadata(req, res, next) {
   })
 }
 
+function loadNav(req, res, next) {
+  db.collection('_metadata', function(err, collection) {
+    if (err) return res.send(500);
+    if (!collection) return res.send(500);
+
+    req.nav = {
+      lists: [],
+      libraries: [],
+      pages: [],
+    };
+    
+    var stream = collection.find().stream();
+    
+    stream.on('data', function(metadata) {
+      if (metadata.type == 'list') {
+        req.nav.lists.push({
+          name: metadata.name, 
+          title: metadata.title,
+        });
+      } else if (metadata.type == 'library') {
+        req.nav.libraries.push({
+          name: metadata.name,
+          title: metadata.title
+        })
+      } else if (metadta.type == 'page') {
+        req.nav.pages.push({
+          name: metadata.name,
+          title: metadata.title
+        })
+      }
+    })
+
+    stream.on('close', function() {
+      next();
+    })
+            
+  })
+}
+
 /**
  * List view
  */
-app.get('/lists/:list', loadMetadata, function(req, res) {
-  res.render('list', { 
+app.get('/lists/:list', loadMetadata, loadNav, function(req, res) {
+  req.nav.lists.forEach(function(list) {
+    if (list.name == req.params.list)
+      list.active = true;
+  })
+  
+  req.nav.steps = [
+    { url: '/lists', title: 'Lists' },
+    { url: '/lists' + req.params.list, title: req.metadata.title },
+    { active: true, title: 'Standard'}
+  ];
+  
+  res.render('list', {
+    nav: req.nav,
     list: req.params.list,
     metadata: req.metadata,
   });
@@ -86,8 +139,20 @@ app.get('/lists/:list', loadMetadata, function(req, res) {
  * Library
  */
 
-app.get('/docs/:library', loadMetadata, function(req, res) {
+app.get('/docs/:library', loadMetadata, loadNav, function(req, res) {
+  req.nav.libraries.forEach(function(library) {
+    if (library.name == req.params.library)
+      library.active = true;
+  })
+  
+  req.nav.steps = [
+    { url: '/docs', title: 'Documents' },
+    { url: '/docs' + req.params.library, title: req.metadata.title },
+    { active: true, title: 'Standard'}
+  ];
+  
   res.render('library', {
+    nav: req.nav,
     library: req.params.library,
     metadata: req.metadata,
   });
@@ -177,14 +242,28 @@ app.put('/docs/:library/:document', function(req, res) {
 /**
  * List Admin View
  */
-app.get('/admin/lists/:list', loadMetadata, function(req, res) {
+app.get('/admin/lists/:list', loadMetadata, loadNav, function(req, res) {
+  req.nav.steps = [
+    { url: '/lists', title: 'Lists' },
+    { url: '/lists' + req.params.list, title: req.metadata.title },
+    { active: true, title: 'Settings'}
+  ];
+  
   res.render('admin', {
+    nav: req.nav,
     metadata: req.metadata,
   })
 })
 
-app.get('/admin/docs/:library', loadMetadata, function(req, res) {
+app.get('/admin/docs/:library', loadMetadata, loadNav, function(req, res) {
+  req.nav.steps = [
+    { url: '/docs', title: 'Documents' },
+    { url: '/docs' + req.params.library, title: req.metadata.title },
+    { active: true, title: 'Settings' }
+  ];
+
   res.render('admin', {
+    nav: req.nav,
     metadata: req.metadata,
   })
 })
