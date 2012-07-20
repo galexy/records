@@ -18,13 +18,7 @@ $(function() {
         initialize: function() {
           var selectable = new Backbone.Picky.Selectable(this);
           _.extend(this, selectable);
-          
-          this.on('change:_file', this.updateName, this);
         },
-        
-        updateName: function() {
-          
-        }
       });
     };
     
@@ -93,6 +87,7 @@ $(function() {
         'submit #newDocumentForm'   : 'submit',
         'shown'                     : 'shown',
         'hidden'                    : 'onHidden',
+        'change input[type="file"]' : 'fileChange'
       },
 
       initialize: function(attributes) {
@@ -115,6 +110,12 @@ $(function() {
 
       onHidden: function() {
         this.model.set(this.model.defaults());
+      },
+      
+      fileChange: function(e) {
+        var file = e.target.files[0];
+        
+        this.model.set('name', file.fileName);
       },
 
       cancel: function(e) {

@@ -118,9 +118,9 @@ block body
         form#newDocumentForm.form-horizontal.well
           fieldset
             .control-group
-              label.control-label(for="_file") File
+              label.control-label File
               .controls
-                input.input-xlarge(name="_file", type="file")
+                input.input-xlarge(type="file")
             each field, i in metadata.fields
               .control-group
                 label.control-label(for="#{field.name}") #{field.heading}
