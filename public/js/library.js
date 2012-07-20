@@ -94,6 +94,7 @@ $(function() {
         this._modelBinder = new Backbone.ModelBinder();
         this.library = attributes.library;
         this.render();
+        this.fileInput = this.$('input[type="file"]').get(0);
       },
 
       render: function() {
@@ -110,11 +111,11 @@ $(function() {
 
       onHidden: function() {
         this.model.set(this.model.defaults());
+        this.fileInput.value = '';
       },
       
       fileChange: function(e) {
-        var file = e.target.files[0];
-        
+        var file = this.fileInput.files[0];
         this.model.set('name', file.fileName);
       },
 

@@ -224,7 +224,8 @@ $(function() {
         this.table = this.$('tbody');
 
         this.newItemView = new Lists.NewItemView({
-          model: new attributes.modelType
+          model: new attributes.modelType,
+          list: this.list,
         });
 
         // bind model events
