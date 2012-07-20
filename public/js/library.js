@@ -85,14 +85,14 @@ $(function() {
         
         this.table = this.$('tbody');
         
-        this.list.on('add', this.addOne, this);
-        this.list.on('reset', this.addAll, this);
-        this.list.on('all', this.render, this);
+        this.library.on('add', this.addOne, this);
+        this.library.on('reset', this.addAll, this);
+        this.library.on('all', this.render, this);
         // this.list.on('select:some', this.selectedSome, this);
         // this.list.on('select:all', this.selectedAll, this);
         // this.list.on('select:none', this.deselected, this);
 
-        this.list.fetch();
+        this.library.fetch();
       },
       
       render: function() {
@@ -107,7 +107,7 @@ $(function() {
       },
 
       addAll: function() {
-        this.list.each($.proxy(this.addOne, this));
+        this.library.each($.proxy(this.addOne, this));
       },
     });
   })(window.Libraries);
