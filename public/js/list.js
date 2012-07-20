@@ -207,7 +207,7 @@ $(function() {
     });
     
     exports.AppView = Backbone.View.extend({
-      el: $('#listview'),
+      el: $('#appview'),
 
       events: {
         'click #refresh'        : 'refresh',

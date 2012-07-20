@@ -223,7 +223,7 @@ $(function() {
     });
     
     exports.LibraryView = Backbone.View.extend({
-      el: $('#libraryview'),
+      el: $('#appview'),
 
       events: {
         'click #addDocument'        : 'addNewDocument',

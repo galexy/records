@@ -1,0 +1,48 @@
+extends layout
+
+block navbar
+  .navbar.navbar-fixed-top
+    .navbar-inner
+      .container-fluid
+        a.btn.btn-navbar(data-toggle="collapse", data-target=".nav-collapse")
+          span.icon-bar
+          span.icon-bar
+          span.icon-bar
+        a.brand(href="#") Records
+        .nav-collapse
+          ul.nav
+            li: a(href="#") Home
+            li.active: a(href="#") Lists
+            li.divider-vertical
+            li: form.navbar-search.pull-right: input.search-query(type="text", placeholder="Search")
+            
+block breadcrumb
+  ul.breadcrumb(style="width: 100%")
+    li
+      a(href="/") Home 
+      span.divider &gt;
+    li
+      a(href="/lists") Lists
+      span.divider &gt;
+    li
+      a(href="/lists/#{metadata.name}") #{metadata.title}
+      span.divider &gt;
+    li.active Standard
+
+block sidenav
+  ul.nav.nav-list
+    li.nav-header Documents
+    li
+      a(href="/docs/records")
+        i.icon-file 
+        | Records
+    li.nav-header Lists
+    li.active
+      a(href="/lists/passwords")
+        i.icon-book
+        | Passwords
+    li.nav-header Pages
+    li
+      a(href="/pages/master")
+        i.icon-flag
+        | Master List
