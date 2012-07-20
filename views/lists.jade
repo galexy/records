@@ -24,15 +24,13 @@ block content
     thead
       tr
         th: input#selectAll(type="checkbox")
-        th Name
         th Title
         th Description
     tbody
 
   script#template(type="template")
     td: input.selector(type="checkbox")
-    td: a.namefield {{ name }}
-    td {{ title }}
+    td: a.namefield(href="/lists/{{name}}"){{title}}
     td {{ description }}
 
   hr
