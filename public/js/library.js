@@ -49,6 +49,7 @@ $(function() {
       events: {
         'click input[type="checkbox"].selector' : 'select',
         'click'                                 : 'select',
+        'click .namefield'                      : 'nameclick',
       },
 
       initialize: function() {
@@ -68,6 +69,10 @@ $(function() {
       select: function(e) {
         e.stopPropagation();
         this.model.toggleSelected();
+      },
+      
+      nameclick: function(e) {
+        e.stopPropagation();
       },
       
       selected: function(e) {

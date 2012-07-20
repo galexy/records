@@ -105,7 +105,7 @@ block body
             case field.type
               when 'String': td {{ #{field.name} }}
               when 'Url': td: a(href="{{ #{field.name} }}"): {{ #{field.name} }}
-              when 'Name': td: a(href="/docs/#{metadata.name}/{{ #{field.name} }}"): {{ #{field.name} }}
+              when 'Name': td: a.namefield(href="/docs/#{metadata.name}/{{ #{field.name} }}"): {{ #{field.name} }}
 
     hr
     
