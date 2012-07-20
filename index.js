@@ -8,6 +8,7 @@ var inflection = require('inflection');
 var Server = mongo.Server;
 var Db = mongo.Db;
 var ObjectID = mongo.ObjectID;
+var GridStore = mongo.GridStore;
 
 var server = new Server('localhost', 27017, { auto_reconnect: true });
 var db = new Db('records', server);
@@ -22,7 +23,11 @@ var app = express.createServer();
 
 app.configure(function () {
   app.use(express.logger());
-  app.use(express.bodyParser());
+  app.use(express.methodOverride());
+  app.use(express.bodyParser({
+    keepExtensions: true, 
+    uploadDir: __dirname + "/public/uploads"
+  }));
   app.use(express.static(__dirname + '/public'));
 });
 
@@ -31,18 +36,34 @@ app.set('view options', {layout: false});
 
 app.error(function(err, req, res, next) {
   console.log(err);
+  console.log(err.stack);
   
   next(err);
 })
 
 function loadMetadata(req, res, next) {
+  var type, name;
+  if (req.params.hasOwnProperty('list')) {
+    type = 'list';
+    name = req.params.list;
+  }
+  else if (req.params.hasOwnProperty('library')) {
+    type = 'library';
+    name = req.params.library;
+  }
+
+  console.log('searching for metadata of type ' + type + ' for ' + name);
+  
   db.collection('_metadata', function(err, collection) {
     if (err) return res.send(500);
     if (!collection) return res.send(500);
     
-    collection.findOne({name: req.params.list}, function(err, metadata) {
+    collection.findOne({type: type, name: name}, function(err, metadata) {
       if (err) return res.send(500);
-      if (!metadata) return res.send(404);
+      if (!metadata) {
+        console.log('could not find metadata')
+        return res.send(404);
+      }
       
       req.metadata = metadata;
       
@@ -62,17 +83,118 @@ app.get('/lists/:list', loadMetadata, function(req, res) {
 })
 
 /**
- * List Admin View
+ * Library
  */
-app.get('/lists/:list/admin', loadMetadata, function(req, res) {
-  res.render('admin', {
-    list: req.params.list,
+
+app.get('/docs/:library', loadMetadata, function(req, res) {
+  res.render('library', {
+    library: req.params.library,
     metadata: req.metadata,
+  });
+})
+
+app.get('/docs/:library/:document', function(req, res) {
+  GridStore.exist(db, req.params.document, req.params.library, function(err, result) {
+    if (err) return res.send(500);
+    if (!result) return res.send(404);
+
+    console.log('file exists');
+
+    var file = new GridStore(db, req.params.document, 'r', {
+      root: req.params.library
+    });
+    
+    console.log(file);
+    
+    file.open(function(err, file) {
+      if (err) return res.send(500);
+      
+      console.log('file opened');
+      
+      console.log(file.contentType);
+      res.contentType(file.contentType);
+      res.header['Content-Disposition'] = 'inline';
+      
+      var stream = file.stream(true);
+      
+      stream.on('data', function(chunk) { 
+        console.log('sending chunk');
+        res.write(chunk); 
+      });
+      stream.on('end', function() {
+        console.log('sending end');
+        res.end(); 
+      });
+      stream.on('close', function() {
+        console.log('close');
+      })
+    })
+  })
+})
+
+app.put('/docs/:library/:document', function(req, res) {
+  if (req._body) {
+    return res.send(400);
+  }
+  
+  var file = new GridStore(db, req.params.document, 'w', {
+    root: req.params.library, 
+    metadata: {
+      name: req.params.document
+    },
+    content_type: req.headers['content-type'],
+  });
+  
+  var length = parseInt(req.headers['content-length']);
+  var buffers = [];
+  
+  req.on('data', function(chunk) { 
+    buffers.push(chunk);
+  });
+
+  req.on('end', function() {
+    file.open(function(err, file) {
+      if (err) return res.send(500);
+
+      var writeLength = 0;
+      var writeCount = 0;
+      buffers.forEach(function(buffer) {
+        file.write(buffer, function(err, file) {
+          writeLength += buffer.length;
+          
+          if (++writeCount == buffers.length) {
+            file.close(function(err, result) {
+              res.statusCode = (writeLength == length) ? 200 : 500;
+              res.end();
+            })
+          }
+        });
+      })
+    })
   })
 })
 
 /**
+ * List Admin View
+ */
+app.get('/admin/lists/:list', loadMetadata, function(req, res) {
+  res.render('admin', {
+    metadata: req.metadata,
+  })
+})
+
+app.get('/admin/docs/:library', loadMetadata, function(req, res) {
+  res.render('admin', {
+    metadata: req.metadata,
+  })
+})
+
+/***************************************************************************
  * REST API Routes
+ ***************************************************************************/
+ 
+/**
+ * Lists and items API
  */
 app.all   ('/api/lists/:list', function(req, res, next) {
   db.collection(req.params.list, function(err, collection) {
@@ -163,6 +285,62 @@ app.delete('/api/lists/:list/:item', function(req, res) {
   })
 })
 
+/**
+ * Library and document metadata API
+ */
+app.get   ('/api/libraries/:library', function(req, res) {
+  db.collection(req.params.library + '.files', function(err, collection) {
+    if (err) return res.send(500);
+    
+    var stream = collection.find().stream();
+    var list = [];
+    
+    stream.on('data', function(data) {
+      list.push(data.metadata);
+    })
+    
+    stream.on('close', function() {
+      res.json(list);
+    })
+  })
+})
+
+app.get   ('/api/libraries/:library/:document', function(req, res) {
+  db.collection(req.params.library + '.files', function(err, collection) {
+    if (err) return res.send(500);
+    
+    collection.findOne({"metadata.name": req.params.document}, function(err, document) {
+      if (err) return res.send(500);
+      
+      if (!document) return res.send(404);
+      
+      res.json(document.metadata);
+    })
+  })
+})
+
+app.put   ('/api/libraries/:library/:document', function(req, res) {
+  if (!req.body.name || req.body.name != req.params.document) return res.send(400);
+  
+  db.collection(req.params.library + '.files', function(err, collection) {
+    if (err) return res.send(500);
+    
+    collection.update({"metadata.name": req.params.document}, {'$set': {metadata: req.body}}, {safe: true}, function(err, count) {
+      if (err) return res.send(500);
+      
+      if (1 == count) {
+        collection.findOne({"metadata.name": req.params.document}, function(err, doc) {
+          if (err) return res.send(500);
+          return res.json(doc.metadata);
+        })
+      }
+      else {
+        return res.send(404);
+      }
+    })
+  })
+})
+
 app.get   ('/api/metadata/lists/:list', loadMetadata, function(req, res) {
   res.send(req.metadata, {'Content-Type': 'application/json'}, 200);
 })
@@ -172,11 +350,11 @@ app.put   ('/api/metadata/lists/:list', function(req, res) {
     if (err) return res.send(500);
     if (!collection) return res.send(500);
     
-    collection.update({name: req.params.list}, {'$set': req.body}, {safe: true}, function(err, count) {
+    collection.update({type: 'list', name: req.params.list}, {'$set': req.body}, {safe: true}, function(err, count) {
       if (err) return res.send(500);
       
       if (1 == count) {
-        collection.findOne({name: req.params.list}, function(err, doc) {
+        collection.findOne({type: 'list', name: req.params.list}, function(err, doc) {
           if (err) return res.send(500);
           return res.send(doc, {'Content-Type': 'application/json'}, 200);
         })
@@ -187,6 +365,32 @@ app.put   ('/api/metadata/lists/:list', function(req, res) {
     })
   })
 })
+
+app.get   ('/api/metadata/libraries/:library', loadMetadata, function(req, res) {
+  res.send(req.metadata, {'Content-Type': 'application/json'}, 200);
+})
+
+app.put   ('/api/metadata/libraries/:library', function(req, res) {
+  db.collection('_metadata', function(err, collection) {
+    if (err) return res.send(500);
+    if (!collection) return res.send(500);
+    
+    collection.update({type: 'library', name: req.params.library}, {'$set': req.body}, {safe: true}, function(err, count) {
+      if (err) return res.send(500);
+      
+      if (1 == count) {
+        collection.findOne({type: 'library', name: req.params.list}, function(err, doc) {
+          if (err) return res.send(500);
+          return res.send(doc, {'Content-Type': 'application/json'}, 200);
+        })
+      }
+      else {
+        return res.send(404);
+      }
+    })
+  })
+})
+
 
 var port = process.env['PORT'] || 3000;
 app.listen(port);

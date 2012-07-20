@@ -1,0 +1,28 @@
+<html>
+  <body>
+    <!-- method="POST" enctype="multipart/form-data" action="http://localhost:3000/docs/test/wp_mysql_Memcached.en.pdf" -->
+    <form id="test">
+      <input name="test" type="file"></input>
+      <input type="submit">Submit</submit>
+    </form>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+    <script>
+    $(function() {
+          $("#test").on('submit', function(e) {
+            e.preventDefault();
+            var file = $("#test input[type='file']")[0].files[0];
+
+            var xhr = new XMLHttpRequest();
+            xhr.open('PUT', '/docs/test/wp_mysql_Memcached.en.pdf', true);
+            xhr.setRequestHeader("Content-Type", file.type);
+            xhr.onload = function(e) {
+              if (this.status == 200) {
+                console.log(this.response);
+              }
+            };
+            xhr.send(file);
+          })
+        })
+    </script>
+  </body>
+</html>

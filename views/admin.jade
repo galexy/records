@@ -8,7 +8,8 @@ block scripts
   script
     $(function() { 
       var settingsView = new Admin.SettingsView({ 
-        model: new Admin.Settings(!{JSON.stringify(metadata)})
+        model: new Admin.Settings(!{JSON.stringify(metadata)}),
+        type: '#{type}',
       }); 
     })
 
@@ -37,7 +38,7 @@ block body
       a(href="/lists") Lists
       span.divider &gt;
     li
-      a(href="/lists/#{list}") #{metadata.title}
+      a(href="/lists/#{metadata.name}") #{metadata.title}
       span.divider &gt;
     li.active Configuration
 
