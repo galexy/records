@@ -224,7 +224,7 @@ $(function() {
     });
   
     var SettingsView = Backbone.View.extend({
-      el: $('#admin-view'),
+      el: $('#appview'),
     
       events: {
         'click #addField'   : 'addField',
