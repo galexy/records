@@ -28,8 +28,6 @@ app.configure(function () {
     keepExtensions: true, 
     uploadDir: __dirname + "/public/uploads"
   }));
-  app.use(express.staticCache());
-  app.use(express.compress());
   app.use(express.static(__dirname + '/public'));
 });
 
@@ -116,6 +114,14 @@ function loadNav(req, res, next) {
 /**
  * List view
  */
+app.get('/lists', loadNav, function(req, res) {
+  req.nav.steps = [ { active: true, title: 'Lists' } ];
+
+  res.render('lists', {
+    nav: req.nav,
+  });
+})
+
 app.get('/lists/:list', loadMetadata, loadNav, function(req, res) {
   req.nav.lists.forEach(function(list) {
     if (list.name == req.params.list)
@@ -138,7 +144,6 @@ app.get('/lists/:list', loadMetadata, loadNav, function(req, res) {
 /**
  * Library
  */
-
 app.get('/docs/:library', loadMetadata, loadNav, function(req, res) {
   req.nav.libraries.forEach(function(library) {
     if (library.name == req.params.library)
@@ -420,54 +425,65 @@ app.put   ('/api/libraries/:library/:document', function(req, res) {
   })
 })
 
+
+/**
+ * Metadata api
+ */
+function findMetadata(type, req, res) {
+  db.collection('_metadata', function(err, collection) {
+    if (err) return res.send(500);
+
+    var stream = collection.find({type: type}).stream();
+    var lists = [];
+
+    stream.on('data', function(data) {
+      delete data.fields;
+      lists.push(data);
+    })
+    stream.on('close', function() {
+      res.json(lists);
+    })
+  })
+}
+
+app.get   ('/api/metadata/lists', function(req, res) {
+  findMetadata('list', req, res);
+})
+
+app.get   ('/api/metadata/libraries', function(req, res) {
+  findMetadata('library', req, res);
+})
+
+function saveItemMetadata(type, req, res) {
+  db.collection('_metadata', function(err, collection) {
+    if (err) return res.send(500);
+    if (!collection) return res.send(500);
+    
+    collection.update({type: type, name: req.params.list}, {'$set': req.body}, {safe: true, upsert: true}, function(err, count) {
+      if (err) return res.send(500);
+      
+      collection.findOne({type: type, name: req.params.list}, function(err, doc) {
+        if (err) return res.send(500);
+        return res.json(doc);
+      })
+    })
+  })
+}
+
 app.get   ('/api/metadata/lists/:list', loadMetadata, function(req, res) {
-  res.send(req.metadata, {'Content-Type': 'application/json'}, 200);
+  res.json(req.metadata);
 })
 
 app.put   ('/api/metadata/lists/:list', function(req, res) {
-  db.collection('_metadata', function(err, collection) {
-    if (err) return res.send(500);
-    if (!collection) return res.send(500);
-    
-    collection.update({type: 'list', name: req.params.list}, {'$set': req.body}, {safe: true}, function(err, count) {
-      if (err) return res.send(500);
-      
-      if (1 == count) {
-        collection.findOne({type: 'list', name: req.params.list}, function(err, doc) {
-          if (err) return res.send(500);
-          return res.send(doc, {'Content-Type': 'application/json'}, 200);
-        })
-      }
-      else {
-        return res.send(404);
-      }
-    })
-  })
+  saveItemMetadata('list', req, res);
 })
 
 app.get   ('/api/metadata/libraries/:library', loadMetadata, function(req, res) {
-  res.send(req.metadata, {'Content-Type': 'application/json'}, 200);
+  res.json(req.metadata);
 })
 
 app.put   ('/api/metadata/libraries/:library', function(req, res) {
-  db.collection('_metadata', function(err, collection) {
-    if (err) return res.send(500);
-    if (!collection) return res.send(500);
-    
-    collection.update({type: 'library', name: req.params.library}, {'$set': req.body}, {safe: true}, function(err, count) {
-      if (err) return res.send(500);
-      
-      if (1 == count) {
-        collection.findOne({type: 'library', name: req.params.list}, function(err, doc) {
-          if (err) return res.send(500);
-          return res.send(doc, {'Content-Type': 'application/json'}, 200);
-        })
-      }
-      else {
-        return res.send(404);
-      }
-    })
-  })
+  saveItemMetadata('library', req, res);
 })
 
 
