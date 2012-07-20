@@ -51,6 +51,8 @@ function loadMetadata(req, res, next) {
     type = 'library';
     name = req.params.library;
   }
+
+  console.log('searching for metadata of type ' + type + ' for ' + name);
   
   db.collection('_metadata', function(err, collection) {
     if (err) return res.send(500);
@@ -58,7 +60,10 @@ function loadMetadata(req, res, next) {
     
     collection.findOne({type: type, name: name}, function(err, metadata) {
       if (err) return res.send(500);
-      if (!metadata) return res.send(404);
+      if (!metadata) {
+        console.log('could not find metadata')
+        return res.send(404);
+      }
       
       req.metadata = metadata;
       
@@ -78,14 +83,8 @@ app.get('/lists/:list', loadMetadata, function(req, res) {
 })
 
 /**
- * List Admin View
+ * Library
  */
-app.get('/lists/:list/admin', loadMetadata, function(req, res) {
-  res.render('admin', {
-    list: req.params.list,
-    metadata: req.metadata,
-  })
-})
 
 app.get('/docs/:library', loadMetadata, function(req, res) {
   res.render('library', {
@@ -172,6 +171,21 @@ app.put('/docs/:library/:document', function(req, res) {
         });
       })
     })
+  })
+})
+
+/**
+ * List Admin View
+ */
+app.get('/admin/lists/:list', loadMetadata, function(req, res) {
+  res.render('admin', {
+    metadata: req.metadata,
+  })
+})
+
+app.get('/admin/docs/:library', loadMetadata, function(req, res) {
+  res.render('admin', {
+    metadata: req.metadata,
   })
 })
 

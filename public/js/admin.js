@@ -41,8 +41,6 @@ $(function() {
     var Settings = Backbone.Model.extend({
       idAttribute: 'name',
 
-      urlRoot: '/api/metadata/lists',
-    
       initialize: function(attributes) {
         if (attributes.hasOwnProperty('fields')) {
           var fields = attributes.fields;
@@ -51,6 +49,11 @@ $(function() {
         
           this.set('fields', fieldCollection);
         }
+        
+        if (this.get('type') == 'list') 
+          this.urlRoot = '/api/metadata/lists';
+        else
+          this.urlRoot = '/api/metadata/libraries'
       },
 
       toJSON: function() {
@@ -58,6 +61,7 @@ $(function() {
           name: this.get('name'),
           title: this.get('title'),
           description: this.get('description'),
+          type: this.get('type'),
           fields: this.get('fields').toJSON(),
         }
       }
@@ -264,8 +268,13 @@ $(function() {
       save: function(e) {
         this.model.save({}, {
           success: function(model, response) {
-            var url = window.location.pathname;
-            window.location.href = url.substr(0, url.lastIndexOf('/'));
+            var url = "";
+            if (model.get('type') == 'list')
+              url = '/lists/' + model.get('name');
+            else if (model.get('type') == 'library')
+              url = '/docs/' + model.get('name');
+            
+            window.location.href = url;
           },
           
           error: function(model, response) {
