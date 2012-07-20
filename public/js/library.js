@@ -148,11 +148,86 @@ $(function() {
       },
     });
     
+    exports.EditDocumentView = Backbone.View.extend({
+      el: $('#editDocumentModal'),
+
+      events: {
+        'shown'                       : 'onShown',
+        'hide'                        : 'onHide',
+        'click #editDocumentCancel'   : 'onCancel',
+        'click #editDocumentSubmit'   : 'submit',
+        'submit #editDocumentForm'    : 'submit',
+      },
+
+      initialize: function() {
+        this._modelBinder = new Backbone.ModelBinder();
+
+        this.render();
+        this.model.on('change', this.onChanged, this);
+
+        this.$el.modal('show');
+        this.processCancel = true;
+      },
+
+      render: function() {
+        this._modelBinder.bind(this.model, this.el);
+      },
+
+      onShown: function() {
+        this.$('input').first().focus();
+      },
+
+      onHide: function() {
+        this._modelBinder.unbind();
+        this.model.off(null, this.onChanged, this);
+        this.undelegateEvents();
+
+        if (this.processCancel) this.cancel();
+      },
+
+      onChanged: function() {
+        this.revert || (this.revert = {});
+
+        for (var field in this.model.changedAttributes()) {
+          if (this.revert.hasOwnProperty(field)) continue;
+
+          this.revert[field] = this.model.previous(field);
+        }
+      },
+
+      onCancel: function(e) {
+        this.cancel();
+        this.$el.modal('hide');
+      },
+
+      cancel: function() {
+        if (this.revert) {
+          this.model.off(null, this.onChanged, this);
+          this.model.set(this.revert);
+        }
+
+        this.processCancel = false;
+      },
+
+      submit: function(e) {
+        e.preventDefault();
+        var self = this;
+
+        this.model.save({}, {
+          success: function(model, response) {
+            self.processCancel = false;
+            self.$el.modal('hide');
+          }
+        })
+      }
+    });
+    
     exports.LibraryView = Backbone.View.extend({
       el: $('#libraryview'),
 
       events: {
         'click #addDocument'        : 'addNewDocument',
+        'click #editDocument'       : 'editDocument',
       },
       
       initialize: function(attributes) {
@@ -182,6 +257,14 @@ $(function() {
       addNewDocument: function() {
         this.newDocumentView.show();
       },
+      
+      editDocument: function() {
+        for (var i in this.library.selected) {
+          var editView = new exports.EditDocumentView({
+            model: this.library.selected[i]
+          });
+        }
+      },
 
       addOne: function(item) {
         var view = new exports.DocumentView({
@@ -207,13 +290,13 @@ $(function() {
       },
 
       enableEditButton: function() {
-        this.$('#editItem')
+        this.$('#editDocument')
           .removeClass('disabled')
           .removeAttr('disabled');
       },
 
       disableEditButton: function() {
-        this.$('#editItem')
+        this.$('#editDocument')
           .addClass('disabled')
           .attr('disabled', 'disabled');
       },

@@ -76,7 +76,7 @@ block body
                 btn.btn#addDocument
                   i.icon-plus
                   | New
-                btn.btn.disabled#editItem(disabled)
+                btn.btn.disabled#editDocument(disabled)
                   i.icon-pencil
                   | Edit
                 btn.btn.disabled#delete(disabled)
@@ -131,3 +131,22 @@ block body
         a#addDocumentCancel.btn.btn-inverse(href="#") Cancel
         a#addDocumentSubmit.btn.btn-primary.submit(href="#") Add Item
   
+    // - Edit Document Modal Dialog
+    #editDocumentModal.modal.hide.fade
+      .modal-header
+        button.close(data-dismiss="modal") x
+        h3 Edit document
+
+      .modal-body
+        form#editDocumentForm.form-horizontal.well
+          fieldset
+            each field, i in metadata.fields
+              .control-group
+                label.control-label #{field.heading}
+                .controls
+                  input.input-xlarge(name="#{field.name}", placeholder="#{field.placeholder}", disabled=(field.type == 'Name'))
+            input(type="submit", style="visibility:hidden;")
+
+      .modal-footer
+        a#editDocumentCancel.btn.btn-inverse(href="#") Cancel
+        a#editDocumentSubmit.btn.btn-primary.submit(href="#") Update
