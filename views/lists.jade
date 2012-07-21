@@ -1,0 +1,36 @@
+extends nav
+
+block title
+  title Lists
+
+block scripts
+  script(src="/js/lists.js")
+
+block content
+  .row-fluid
+    .btn-toolbar.span9(style="margin-top: 0; margin-bottom: 0;")
+      .btn-group
+        a.btn#refresh
+          i.icon-refresh
+          | Refresh
+        a.btn#addItem(href="/admin/newlist")
+          i.icon-plus
+          | New
+        a.btn.disabled#delete(disabled)
+          i.icon-trash
+          | Delete
+
+  table.table.table-striped.table-condensed
+    thead
+      tr
+        th: input#selectAll(type="checkbox")
+        th Title
+        th Description
+    tbody
+
+  script#template(type="template")
+    td: input.selector(type="checkbox")
+    td: a.namefield(href="/lists/{{name}}"){{title}}
+    td {{ description }}
+
+  hr
