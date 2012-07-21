@@ -24,7 +24,7 @@ block content
 
   .row-fluid
     form#details.form-horizontal
-      legend List details
+      legend List Information
       .control-group
         label.control-label(for="name") Name:
         .controls
@@ -39,7 +39,8 @@ block content
           input#description(name="description", type="textarea", placeholder="Description of the list")
 
   legend Fields
-  
+  p
+   | Each field stores some information about a single item within a list.
   table.table.table-striped.table-condensed
     thead
       tr
@@ -124,6 +125,10 @@ block modal
               select(name="type")
                 option(value="String") String
                 option(value="Url") Url
+                option(value="Number") Number
+                option(value="Date") Date
+                option(value="Choice") Choice
+                option(value="Boolean") Yes/No
                 option(value="Name") Name
           .control-group
             label.control-label Placeholder:
@@ -133,6 +138,30 @@ block modal
             label.control-label Required:
             .controls
               input.input-xlarge(name="required", type="checkbox")
+          hr
+          #string-options
+            .control-group
+              label.control-label Maximum Length:
+              .controls
+                input.input-xlarge(name="maxLength", type="number", min="0", max="1024")
+            .control-group
+              label.control-label Default:
+              .controls
+                input.input-xlarge(name="default", type="text")
+          #number-options.hidden
+            .control-group
+              label.control-label Min:
+              .controls
+                input.input-xlarge(name="min", type="number")
+            .control-group
+              label.control-label Max:
+              .controls
+                input.input-xlarge(name="max", type="number")
+          #choice-options.hidden
+            .control-group
+              label.control-label Choices:
+              .controls
+                textarea.input-xlarge(name="choices")
 
           input(type="submit", style="visibility:hidden;")
     .modal-footer
