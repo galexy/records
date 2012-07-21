@@ -1,10 +1,10 @@
 extends nav
 
 block title
-  title Lists
+  title Documents
 
 block scripts
-  script(src="/js/lists.js")
+  script(src="/js/libraries.js")
 
 block content
   .row-fluid
@@ -13,7 +13,7 @@ block content
         a.btn#refresh
           i.icon-refresh
           | Refresh
-        a.btn#addItem(href="/admin/newlist")
+        a.btn#addItem(href="/admin/newlibrary")
           i.icon-plus
           | New
         a.btn.disabled#delete(disabled)
@@ -30,7 +30,7 @@ block content
 
   script#template(type="template")
     td: input.selector(type="checkbox")
-    td: a.namefield(href="/lists/{{name}}"){{title}}
+    td: a.namefield(href="/docs/{{name}}"){{title}}
     td {{ description }}
 
   hr

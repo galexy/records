@@ -1,14 +1,14 @@
 
 $(function() {
   
-  window.Lists = window.Lists || {};
+  window.Libraries = window.Libraries || {};
   
   (function(exports) {
     
     /**
      * Models
      */
-    exports.List = Backbone.Model.extend({
+    exports.Library = Backbone.Model.extend({
       idAttribute: 'name',
       
       defaults: function() {
@@ -16,6 +16,7 @@ $(function() {
           name: '',
           title: '',
           description: '',
+          type: 'library',
         }
       },
       
@@ -25,10 +26,10 @@ $(function() {
       }
     });
     
-    exports.ListCollection = Backbone.Collection.extend({
-      model: exports.List,
+    exports.LibraryCollection = Backbone.Collection.extend({
+      model: exports.Library,
 
-      url: '/api/metadata/lists',
+      url: '/api/metadata/libraries',
 
       initialize: function() {
         var multiSelect = new Backbone.Picky.MultiSelect(this);
@@ -36,7 +37,7 @@ $(function() {
       }
     });
     
-    exports.ListView = Backbone.View.extend({
+    exports.LibraryView = Backbone.View.extend({
       tagName: 'tr',
       
       template: $('#template').text(),
@@ -68,7 +69,7 @@ $(function() {
       
       goto: function(e) {
         e.stopPropagation();
-        window.location.href = '/lists/' + this.model.get('name');
+        window.location.href = '/docs/' + this.model.get('name');
       },
       
       selected: function(e) {
@@ -84,23 +85,23 @@ $(function() {
       el: $('#appview'),
       
       events: {
-
+        
       },
       
       initialize: function() {
-        this.lists = new exports.ListCollection;
+        this.libraries = new exports.LibraryCollection;
         
         this.table = this.$('tbody');
         
         // bind model events
-        this.lists.on('add', this.addOne, this);
-        this.lists.on('reset', this.addAll, this);
-        this.lists.on('all', this.render, this);
-        this.lists.on('select:some', this.selectedSome, this);
-        this.lists.on('select:all', this.selectedAll, this);
-        this.lists.on('select:none', this.deselected, this);
+        this.libraries.on('add', this.addOne, this);
+        this.libraries.on('reset', this.addAll, this);
+        this.libraries.on('all', this.render, this);
+        this.libraries.on('select:some', this.selectedSome, this);
+        this.libraries.on('select:all', this.selectedAll, this);
+        this.libraries.on('select:none', this.deselected, this);
         
-        this.lists.fetch();
+        this.libraries.fetch();
       },
       
       render: function() {
@@ -108,14 +109,14 @@ $(function() {
       },
       
       addOne: function(item) {
-        var view = new exports.ListView({
+        var view = new exports.LibraryView({
           model: item
         });
         this.table.append(view.render().el);
       },
 
       addAll: function() {
-        this.lists.each($.proxy(this.addOne, this));
+        this.libraries.each($.proxy(this.addOne, this));
       },
       
       enableDeleteButton: function() {
@@ -168,7 +169,7 @@ $(function() {
       },
     });
     
-  })(window.Lists);
+  })(window.Libraries);
   
-  var app = new window.Lists.AppView;
+  var app = new window.Libraries.AppView;
 })

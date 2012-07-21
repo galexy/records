@@ -144,6 +144,14 @@ app.get('/lists/:list', loadMetadata, loadNav, function(req, res) {
 /**
  * Library
  */
+app.get('/docs', loadNav, function(req, res) {
+  req.nav.steps = [ { active: true, title: 'Documents' } ];
+  
+  res.render('libraries', {
+    nav: req.nav,
+  })
+})
+
 app.get('/docs/:library', loadMetadata, loadNav, function(req, res) {
   req.nav.libraries.forEach(function(library) {
     if (library.name == req.params.library)
@@ -260,6 +268,34 @@ app.get('/admin/lists/:list', loadMetadata, loadNav, function(req, res) {
   })
 })
 
+app.get('/admin/newlist', loadNav, function(req, res) {
+  req.nav.steps = [
+    { url: '/lists', title: 'Lists' },
+    { active: true, title: 'New'}
+  ];
+  
+  res.render('admin', {
+    nav: req.nav,
+    metadata: {
+      name: '',
+      title: '',
+      description: '',
+      type: 'list',
+      fields: [
+        { 
+          "name" : "name",
+          "heading" : "Name",
+          "placeholder" : "Name",
+          "type" : "Name",
+          "required" : true,
+          "default" : "",
+          "formType" : "text" 
+        },
+      ],
+    }
+  })
+})
+
 app.get('/admin/docs/:library', loadMetadata, loadNav, function(req, res) {
   req.nav.steps = [
     { url: '/docs', title: 'Documents' },
@@ -270,6 +306,34 @@ app.get('/admin/docs/:library', loadMetadata, loadNav, function(req, res) {
   res.render('admin', {
     nav: req.nav,
     metadata: req.metadata,
+  })
+})
+
+app.get('/admin/newlibrary', loadNav, function(req, res) {
+  req.nav.steps = [
+    { url: '/docs', title: 'Documents' },
+    { active: true, title: 'New'}
+  ];
+  
+  res.render('admin', {
+    nav: req.nav,
+    metadata: {
+      name: '',
+      title: '',
+      description: '',
+      type: 'library',
+      fields: [
+        { 
+          "name" : "name",
+          "heading" : "Name",
+          "placeholder" : "File Name",
+          "type" : "Name",
+          "required" : true,
+          "default" : "",
+          "formType" : "text" 
+        },
+      ],
+    }
   })
 })
 
@@ -454,15 +518,15 @@ app.get   ('/api/metadata/libraries', function(req, res) {
   findMetadata('library', req, res);
 })
 
-function saveItemMetadata(type, req, res) {
+function saveItemMetadata(type, name, req, res) {
   db.collection('_metadata', function(err, collection) {
     if (err) return res.send(500);
     if (!collection) return res.send(500);
     
-    collection.update({type: type, name: req.params.list}, {'$set': req.body}, {safe: true, upsert: true}, function(err, count) {
+    collection.update({type: type, name: name}, {'$set': req.body}, {safe: true, upsert: true}, function(err, count) {
       if (err) return res.send(500);
       
-      collection.findOne({type: type, name: req.params.list}, function(err, doc) {
+      collection.findOne({type: type, name: name}, function(err, doc) {
         if (err) return res.send(500);
         return res.json(doc);
       })
@@ -475,7 +539,7 @@ app.get   ('/api/metadata/lists/:list', loadMetadata, function(req, res) {
 })
 
 app.put   ('/api/metadata/lists/:list', function(req, res) {
-  saveItemMetadata('list', req, res);
+  saveItemMetadata('list', req.params.list, req, res);
 })
 
 app.get   ('/api/metadata/libraries/:library', loadMetadata, function(req, res) {
@@ -483,7 +547,7 @@ app.get   ('/api/metadata/libraries/:library', loadMetadata, function(req, res) 
 })
 
 app.put   ('/api/metadata/libraries/:library', function(req, res) {
-  saveItemMetadata('library', req, res);
+  saveItemMetadata('library', req.params.library, req, res);
 })
 
 
