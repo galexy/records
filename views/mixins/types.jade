@@ -1,0 +1,41 @@
+}}
+mixin field-input(field, allowNameEdit)
+  .controls
+    case field.type
+      when 'String': input.input-xlarge(name="#{field.name}", type="text", placeholder="#{field.placeholder}")
+      when 'Url': input.input-xlarge(name="#{field.name}", type="url", placeholder="#{field.placeholder}")
+      when 'Number': input.input-xlarge(name="#{field.name}", type="number", placeholder="#{field.placeholder}")
+      when 'Date'
+        .input-append
+          input(name="#{field.name}", type="text", placeholder="#{field.placeholder}")
+          span.add-on: i.icon-th
+      when 'Choice'
+        select(name="#{field.name}")
+          for choice in field.options.choices
+            option(value="#{choice}") #{choice}
+      when 'Boolean': input.input-xlarge(name="#{field.name}", type="checkbox")
+      when 'User': input.input-xlarge(name="#{field.name}", type="email", placeholder="#{field.placeholder}")
+      when 'Name': input.input-xlarge(name="#{field.name}", type="text", placeholder="#{field.placeholder}", disabled=!allowNameEdit)
+      
+mixin list-field-view(field)
+  case field.type
+    when 'String': td {{ #{field.name} }}
+    when 'Url': td: a(href="{{ #{field.name} }}"): {{ #{field.name} }}
+    when 'Number': td {{ #{field.name} }}
+    when 'Date': td {{_formatDate #{field.name} }}
+    when 'Choice': td {{ #{field.name} }}
+    when 'Boolean': td {{ #{field.name} }}
+    when 'User': td {{ #{field.name} }}
+    when 'Name': td: a.namefield: {{ #{field.name} }}
+    
+mixin library-field-view(field)
+  case field.type
+    when 'String': td {{ #{field.name} }}
+    when 'Url': td: a(href="{{ #{field.name} }}"): {{ #{field.name} }}
+    when 'Number': td {{ #{field.name} }}
+    when 'Date': td {{_formatDate #{field.name} }}
+    when 'Number': td {{ #{field.name} }}
+    when 'Choice': td {{ #{field.name} }}
+    when 'Boolean': td {{ #{field.name} }}
+    when 'User': td {{ #{field.name} }}
+    when 'Name': td: a.namefield(href="/docs/#{metadata.name}/{{ #{field.name} }}"): {{ #{field.name} }}

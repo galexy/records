@@ -10,7 +10,7 @@ $(function() {
     /**************************
      * Models
      **************************/
-    var Field = Backbone.Model.extend({
+    var Field = Backbone.DeepModel.extend({
       defaults: function() {
         return {
           name: '',
@@ -20,17 +20,6 @@ $(function() {
           required: false,
           default: '',
         }
-      },
-      
-      initialize: function() {
-        this.bind('change:type', this.updateFormType, this);
-      },
-      
-      updateFormType: function() {
-        var type = this.get('type');
-        if      ('String' == type) this.set('formType', 'text')
-        else if ('Name' == type) this.set('formType', 'text')
-        else if ('Url' == type) this.set('formType', 'url')
       },
     })
   
@@ -70,6 +59,24 @@ $(function() {
     /**************************
      * Views
      **************************/
+    var intConverter = function(direction, value) {
+      switch (direction) {
+        case "ModelToView":
+          return value;
+        case "ViewToModel":
+          return parseInt(value);
+      }
+    };
+    
+    var choiceConverter = function(direction, value) {
+      switch (direction) {
+        case "ModelToView":
+          return (Array.isArray(value)) ? value.join("\n") : "";
+        case "ViewToModel":
+          return value.split("\n");
+      }
+    };
+    
     var NewFieldView = Backbone.View.extend({
       el: $('#newFieldModal'),
 
@@ -79,6 +86,7 @@ $(function() {
         'submit #newFieldForm'   : 'submit',
         'shown'                  : 'shown',
         'hidden'                 : 'onHidden',
+        'change select[name="type"]'  : 'onChangeType',
       },
     
       initialize: function(attributes) {
@@ -88,7 +96,14 @@ $(function() {
       },
     
       render: function() {
-        this._modelBinder.bind(this.model, this.el);
+        var bindings = Backbone.ModelBinder.createDefaultBindings(this.el, 'name');
+
+        bindings['options.maxLength'].converter = intConverter;
+        bindings['options.min'].converter = intConverter;
+        bindings['options.max'].converter = intConverter;
+        bindings['options.choices'].converter = choiceConverter;
+                
+        this._modelBinder.bind(this.model, this.el, bindings);
       },
     
       show: function() {
@@ -101,6 +116,19 @@ $(function() {
     
       onHidden: function() {
         this.model.set(this.model.defaults());
+      },
+      
+      onChangeType: function(e) {
+        this.$('.options')
+          .not('.hidden')
+          .addClass('hidden');
+          
+        var options = $(e.target.options[e.target.selectedIndex]).data('options');
+        if (options) {
+          this.$(options).removeClass('hidden');
+        }
+        
+        this.model.unset('options');
       },
     
       cancel: function(e) {
@@ -118,26 +146,34 @@ $(function() {
       el: $('#editFieldModal'),
 
       events: {
-        'click #editFieldCancel'  : 'onCancel',
-        'click #editFieldSubmit'  : 'submit',
-        'submit #editFieldForm'   : 'submit',
-        'shown'                   : 'shown',
-        'hidden'                  : 'onHidden',
+        'click #editFieldCancel'      : 'onCancel',
+        'click #editFieldSubmit'      : 'submit',
+        'submit #editFieldForm'       : 'submit',
+        'shown'                       : 'shown',
+        'hidden'                      : 'onHidden',
+        'change select[name="type"]'  : 'onChangeType',
       },
     
       initialize: function() {
         this._modelBinder = new Backbone.ModelBinder();
 
         this.render();
-      
+        
         this.model.on('change', this.onChanged, this);
       
         this.$el.modal('show');
         this.processCancel = true;
       },
-    
+
       render: function() {
-        this._modelBinder.bind(this.model, this.el);
+        var bindings = Backbone.ModelBinder.createDefaultBindings(this.el, 'name');
+
+        bindings['options.maxLength'].converter = intConverter;
+        bindings['options.min'].converter = intConverter;
+        bindings['options.max'].converter = intConverter;
+        bindings['options.choices'].converter = choiceConverter;
+                
+        this._modelBinder.bind(this.model, this.el, bindings);
       },
     
       shown: function() {
@@ -162,6 +198,19 @@ $(function() {
         this.cancel();
         this.$el.modal('hide');
       },
+      
+      onChangeType: function(e) {
+        this.$('.options')
+          .not('.hidden')
+          .addClass('hidden');
+          
+        var options = $(e.target.options[e.target.selectedIndex]).data('options');
+        if (options) {
+          this.$(options).removeClass('hidden');
+        }
+        
+        this.model.unset('options');
+      },
     
       cancel: function() {
         if (this.revert) {
@@ -181,7 +230,7 @@ $(function() {
     var FieldView = Backbone.View.extend({
       tagName: 'tr',
     
-      template: $('#fieldTemplate').text(),
+      template: Handlebars.compile($('#fieldTemplate').text()),
     
       events: {
         'click .icon-remove'  : 'delete',
@@ -196,7 +245,7 @@ $(function() {
       },
     
       render: function() {
-        this.$el.html(Mustache.render(this.template, this.model.toJSON()));
+        this.$el.html(this.template(this.model.attributes));
         return this;
       },
     

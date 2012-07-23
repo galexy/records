@@ -1,4 +1,5 @@
 extends nav
+include mixins/types
 
 block title
   title #{metadata.title}
@@ -8,6 +9,7 @@ block scripts
   script
     $(function() {
       window.Libraries.#{metadata.name} = window.Libraries.DocumentModelFactory({});
+      window.Libraries.#{metadata.name}.metadata = !{JSON.stringify(metadata)};
       window.Libraries.#{metadata.name}Collection = window.Libraries.DocumentCollectionFactory(window.Libraries.#{metadata.name}, '/api/libraries/#{metadata.name}');
       var app = new window.Libraries.LibraryView({
         modelType: window.Libraries.#{metadata.name},
@@ -51,10 +53,7 @@ block content
     td
       input.selector(type="checkbox")
     each field, i in metadata.fields
-      case field.type
-        when 'String': td {{ #{field.name} }}
-        when 'Url': td: a(href="{{ #{field.name} }}"): {{ #{field.name} }}
-        when 'Name': td: a.namefield(href="/docs/#{metadata.name}/{{ #{field.name} }}"): {{ #{field.name} }}
+      mixin library-field-view(field)
 
   hr
 
@@ -74,8 +73,7 @@ block modal
           each field, i in metadata.fields
             .control-group
               label.control-label(for="#{field.name}") #{field.heading}
-              .controls
-                input.input-xlarge(name="#{field.name}", type="#{field.formType}", placeholder="#{field.placeholder}")
+              mixin field-input(field, true)
           input(type="submit", style="visibility:hidden;")
     .modal-footer
       a#addDocumentCancel.btn.btn-inverse(href="#") Cancel
@@ -93,8 +91,7 @@ block modal
           each field, i in metadata.fields
             .control-group
               label.control-label #{field.heading}
-              .controls
-                input.input-xlarge(name="#{field.name}", placeholder="#{field.placeholder}", disabled=(field.type == 'Name'))
+              mixin field-input(field, false)
           input(type="submit", style="visibility:hidden;")
 
     .modal-footer

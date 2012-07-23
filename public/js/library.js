@@ -3,11 +3,18 @@ $(function() {
   window.Libraries = window.Libraries || {};
   
   (function(exports) {
-    
+
     /**
      * Model Factories
      */
+
     exports.DocumentModelFactory = function(defaultValues) {
+      function dateFields(model) {
+        return _.filter(model.constructor.metadata.fields, function(field) {
+          return field.type == 'Date'
+        });
+      }
+      
       return Backbone.Model.extend({
         defaults: function() {
           return defaultValues;
@@ -19,7 +26,26 @@ $(function() {
           var selectable = new Backbone.Picky.Selectable(this);
           _.extend(this, selectable);
         },
-      });
+        
+        parse: function(response) {
+          dateFields(this).forEach(function(field) {
+            if (response.hasOwnProperty(field.name)) {
+              response[field.name] = new Date(response[field.name]);
+            }
+          })
+          return response;
+        },
+        
+        toJSON: function() {
+          var json = Backbone.Model.prototype.toJSON.call(this);
+          dateFields(this).forEach(function(field) {
+            if (json.hasOwnProperty(field.name) && json[field.name] instanceof Date) {
+              json[field.name] = json[field.name].valueOf();
+            }
+          })
+          return json;
+        }
+      })
     };
     
     exports.DocumentCollectionFactory = function(Model, url) {
@@ -38,7 +64,7 @@ $(function() {
     exports.DocumentView = Backbone.View.extend({
       tagName: 'tr',
       
-      template: $('#documentTemplate').text(),
+      template: Handlebars.compile($('#documentTemplate').text()),
       
       events: {
         'click input[type="checkbox"].selector' : 'select',
@@ -54,7 +80,7 @@ $(function() {
       },
 
       render: function() {
-        this.$el.html(Mustache.render(this.template, this.model.toJSON()));
+        this.$el.html(this.template(this.model.attributes));
         this.$('input[type="checkbox"].selector').attr('checked', this.model.selected);
 
         return this;
@@ -75,8 +101,36 @@ $(function() {
 
       deselected: function(e) {
         this.$('input[type="checkbox"].selector').attr('checked', false);
-      },      
+      },
     });
+    
+    function metaConverter(parse, format) {
+      return function(direction, value) {
+        switch (direction) {
+          case 'ModelToView':
+            return (format) ? format(value) : value;
+          case 'ViewToModel':
+            return parse(value);
+        }
+      }
+    }
+
+    var numberConverter = metaConverter(function(value) { 
+      return Number(value); 
+    })
+
+    var dateConverter = metaConverter(function(value) {
+      return new Date(Date.parse(value));
+    },
+    function(value) {
+      if (!value || !(value instanceof Date)) return "";
+
+      return (value.getMonth() + 1) + "/" + value.getDate() + "/" + (value.getFullYear());
+    })
+
+    var booleanConverter = metaConverter(function(value) {
+      return Boolean(value); 
+    })
     
     exports.NewDocumentView = Backbone.View.extend({
       el: $('#newDocumentModal'),
@@ -98,7 +152,23 @@ $(function() {
       },
 
       render: function() {
-        this._modelBinder.bind(this.model, this.el);
+        var bindings = Backbone.ModelBinder.createDefaultBindings(this.el, 'name');
+
+        this.model.constructor.metadata.fields.forEach(function(field) {
+          switch (field.type) {
+            case 'Number':
+              bindings[field.name].converter = numberConverter;
+              break;
+            case 'Date':
+              bindings[field.name].converter = dateConverter;
+              break;
+            case 'Boolean':
+              bindings[field.name].converter = booleanConverter;
+              break;
+          }
+        })
+
+        this._modelBinder.bind(this.model, this.el, bindings);
       },
 
       show: function() {
@@ -170,7 +240,23 @@ $(function() {
       },
 
       render: function() {
-        this._modelBinder.bind(this.model, this.el);
+        var bindings = Backbone.ModelBinder.createDefaultBindings(this.el, 'name');
+        
+        this.model.constructor.metadata.fields.forEach(function(field) {
+          switch (field.type) {
+            case 'Number':
+              bindings[field.name].converter = numberConverter;
+              break;
+            case 'Date':
+              bindings[field.name].converter = dateConverter;
+              break;
+            case 'Boolean':
+              bindings[field.name].converter = booleanConverter;
+              break;
+          }
+        })
+        
+        this._modelBinder.bind(this.model, this.el, bindings);
       },
 
       onShown: function() {
