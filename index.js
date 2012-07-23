@@ -258,7 +258,7 @@ app.put('/docs/:library/:document', function(req, res) {
 app.get('/admin/lists/:list', loadMetadata, loadNav, function(req, res) {
   req.nav.steps = [
     { url: '/lists', title: 'Lists' },
-    { url: '/lists' + req.params.list, title: req.metadata.title },
+    { url: '/lists/' + req.params.list, title: req.metadata.title },
     { active: true, title: 'Settings'}
   ];
   
@@ -289,7 +289,6 @@ app.get('/admin/newlist', loadNav, function(req, res) {
           "type" : "Name",
           "required" : true,
           "default" : "",
-          "formType" : "text" 
         },
       ],
     }
@@ -299,7 +298,7 @@ app.get('/admin/newlist', loadNav, function(req, res) {
 app.get('/admin/docs/:library', loadMetadata, loadNav, function(req, res) {
   req.nav.steps = [
     { url: '/docs', title: 'Documents' },
-    { url: '/docs' + req.params.library, title: req.metadata.title },
+    { url: '/docs/' + req.params.library, title: req.metadata.title },
     { active: true, title: 'Settings' }
   ];
 
@@ -330,7 +329,6 @@ app.get('/admin/newlibrary', loadNav, function(req, res) {
           "type" : "Name",
           "required" : true,
           "default" : "",
-          "formType" : "text" 
         },
       ],
     }
