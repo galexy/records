@@ -40,7 +40,7 @@ $(function() {
     exports.LibraryView = Backbone.View.extend({
       tagName: 'tr',
       
-      template: $('#template').text(),
+      template: Handlebars.compile($('#template').text()),
       
       events: {
         'click input[type="checkbox"].selector' : 'select',
@@ -56,7 +56,7 @@ $(function() {
       },
       
       render: function() {
-        this.$el.html(Mustache.render(this.template, this.model.toJSON()));
+        this.$el.html(this.template(this.model.attributes));
         this.$('input[type="checkbox"].selector').attr('checked', this.model.selected);
 
         return this;

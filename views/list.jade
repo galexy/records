@@ -1,4 +1,5 @@
 extends nav
+include mixins/types
 
 block title
   title #{metadata.title}
@@ -8,6 +9,7 @@ block scripts
   script
     $(function() {
       window.Lists.#{metadata.name} = window.Lists.ListModelFactory({});
+      window.Lists.#{metadata.name}.metadata = !{JSON.stringify(metadata)};
       window.Lists.#{metadata.name}Collection = window.Lists.ListCollectionFactory(window.Lists.#{metadata.name}, '/api/lists/#{metadata.name}');
       var app = new window.Lists.AppView({
         modelType: window.Lists.#{metadata.name},
@@ -51,10 +53,8 @@ block content
     td
       input.selector(type="checkbox")
     each field, i in metadata.fields
-      case field.type
-        when 'String': td {{ #{field.name} }}
-        when 'Url': td: a(href="{{ #{field.name} }}"): {{ #{field.name} }}
-        when 'Name': td: a.namefield: {{ #{field.name} }}
+      mixin list-field-view(field)
+      
   hr
 
 block modal
@@ -69,8 +69,7 @@ block modal
           each field, i in metadata.fields
             .control-group
               label.control-label(for="#{field.name}") #{field.heading}
-              .controls
-                input.input-xlarge(name="#{field.name}", type="#{field.formType}", placeholder="#{field.placeholder}")
+              mixin field-input(field, true)
           input(type="submit", style="visibility:hidden;")
     .modal-footer
       a#addItemCancel.btn.btn-inverse(href="#") Cancel
@@ -88,8 +87,7 @@ block modal
           each field, i in metadata.fields
             .control-group
               label.control-label #{field.heading}
-              .controls
-                input.input-xlarge(name="#{field.name}", placeholder="#{field.placeholder}")
+              mixin field-input(field, false)
           input(type="submit", style="visibility:hidden;")
 
     .modal-footer
