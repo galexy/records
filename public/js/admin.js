@@ -46,11 +46,38 @@ $(function() {
       },
 
       toJSON: function() {
+        var defaults = this.get('fields').reduce(function(defaults, field) {
+          var fieldName = field.get('name');
+          switch(field.get('type')) {
+            case 'String':
+            case 'Url':
+            case 'User':
+            case 'Name':
+              defaults[fieldName] = '';
+              break;
+            case 'Number':
+              defaults[fieldName] = 0;
+              break;
+            case 'Date':
+              defaults[fieldName] = null;
+              break;
+            case 'Choice':
+              defaults[fieldName] = field.get('options').choices[0];
+              break;
+            case 'Boolean':
+              defaults[fieldName] = false;
+              break;
+          }
+          
+          return defaults;
+        }, {});
+        
         return {
           name: this.get('name'),
           title: this.get('title'),
           description: this.get('description'),
           type: this.get('type'),
+          defaults: defaults,
           fields: this.get('fields').toJSON(),
         }
       }

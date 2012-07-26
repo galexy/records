@@ -8,7 +8,7 @@ $(function() {
      * Model Factories
      */
 
-    exports.DocumentModelFactory = function(defaultValues) {
+    exports.DocumentModelFactory = function() {
       function dateFields(model) {
         return _.filter(model.constructor.metadata.fields, function(field) {
           return field.type == 'Date'
@@ -17,7 +17,7 @@ $(function() {
       
       return Backbone.Model.extend({
         defaults: function() {
-          return defaultValues;
+          return this.constructor.metadata.defaults;
         },
         
         idAttribute: 'name',
@@ -29,7 +29,7 @@ $(function() {
         
         parse: function(response) {
           dateFields(this).forEach(function(field) {
-            if (response.hasOwnProperty(field.name)) {
+            if (response.hasOwnProperty(field.name) && response[field.name]) {
               response[field.name] = new Date(response[field.name]);
             }
           })
@@ -120,6 +120,8 @@ $(function() {
     })
 
     var dateConverter = metaConverter(function(value) {
+      if (!value || '' == value) return null;
+      
       return new Date(Date.parse(value));
     },
     function(value) {
@@ -180,7 +182,9 @@ $(function() {
       },
 
       onHidden: function() {
-        this.model.set(this.model.defaults());
+        this._modelBinder.unbind();
+        this.undelegateEvents();
+        
         this.fileInput.value = '';
       },
       
@@ -202,7 +206,7 @@ $(function() {
         var fileName = this.model.get('name');
         
         var xhr = new XMLHttpRequest();
-        xhr.open('PUT', '/docs/records/' + fileName, true);
+        xhr.open('PUT', '/docs/' + this.model.constructor.metadata.name + '/' + fileName, true);
         xhr.setRequestHeader("Content-Type", file.type);
         xhr.onload = function(e) {
           if (this.status == 200) {
@@ -317,14 +321,10 @@ $(function() {
       },
       
       initialize: function(attributes) {
+        this.modelType = attributes.modelType;
         this.library = new attributes.collectionType;
         
         this.table = this.$('tbody');
-        
-        this.newDocumentView = new exports.NewDocumentView({
-          model: new attributes.modelType,
-          library: this.library,
-        })
         
         this.library.on('add', this.addOne, this);
         this.library.on('reset', this.addAll, this);
@@ -341,7 +341,12 @@ $(function() {
       },
       
       addNewDocument: function() {
-        this.newDocumentView.show();
+        var newDocumentView = new exports.NewDocumentView({
+          model: new this.modelType,
+          library: this.library,
+        })
+        
+        newDocumentView.show();
       },
       
       editDocument: function() {

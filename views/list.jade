@@ -42,11 +42,9 @@ block content
   table.table.table-striped.table-condensed
     thead
       tr
-        th
-          input#selectAll(type="checkbox")
+        th: input#selectAll(type="checkbox")
         each field, i in metadata.fields
-          th
-            | #{field.heading}
+          th #{field.heading}
     tbody
 
   script#listItemTemplate(type="template")

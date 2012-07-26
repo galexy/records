@@ -8,7 +8,7 @@ $(function() {
      * Model Factory
      **************************/
 
-    exports.ListModelFactory = function(defaultValues) {
+    exports.ListModelFactory = function() {
       function dateFields(model) {
         return _.filter(model.constructor.metadata.fields, function(field) {
           return field.type == 'Date'
@@ -17,7 +17,7 @@ $(function() {
       
       return Backbone.Model.extend({
         defaults: function() {
-          return defaultValues;
+          return this.constructor.metadata.defaults;
         },
         
         idAttribute: '_id',
@@ -29,7 +29,7 @@ $(function() {
         
         parse: function(response) {
           dateFields(this).forEach(function(field) {
-            if (response.hasOwnProperty(field.name)) {
+            if (response.hasOwnProperty(field.name) && response[field.name]) {
               response[field.name] = new Date(response[field.name]);
             }
           })
@@ -125,6 +125,8 @@ $(function() {
     })
     
     var dateConverter = metaConverter(function(value) {
+      if (!value || '' == value) return null;
+      
       return new Date(Date.parse(value));
     },
     function(value) {
@@ -183,7 +185,8 @@ $(function() {
       },
 
       onHidden: function() {
-        this.model.set(this.model.defaults());
+        this._modelBinder.unbind();
+        this.undelegateEvents();
       },
       
       cancel: function(e) {
@@ -299,15 +302,10 @@ $(function() {
       },
 
       initialize: function(attributes) {
-        
+        this.modelType = attributes.modelType;
         this.list = new attributes.listType;
 
         this.table = this.$('tbody');
-
-        this.newItemView = new Lists.NewItemView({
-          model: new attributes.modelType,
-          list: this.list,
-        });
 
         // bind model events
         this.list.on('add', this.addOne, this);
@@ -329,7 +327,12 @@ $(function() {
       },
 
       addNewItem: function(e) {
-        this.newItemView.show();
+        var newItemView = new Lists.NewItemView({
+          model: new this.modelType,
+          list: this.list,
+        });
+        
+        newItemView.show();
       },
 
       delete: function(e) {

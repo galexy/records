@@ -8,7 +8,7 @@ block scripts
   script(src="/js/library.js")
   script
     $(function() {
-      window.Libraries.#{metadata.name} = window.Libraries.DocumentModelFactory({});
+      window.Libraries.#{metadata.name} = window.Libraries.DocumentModelFactory();
       window.Libraries.#{metadata.name}.metadata = !{JSON.stringify(metadata)};
       window.Libraries.#{metadata.name}Collection = window.Libraries.DocumentCollectionFactory(window.Libraries.#{metadata.name}, '/api/libraries/#{metadata.name}');
       var app = new window.Libraries.LibraryView({
