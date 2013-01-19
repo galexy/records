@@ -313,7 +313,7 @@ $(function() {
         this._modelBinder = new Backbone.ModelBinder();
       
         this.newFieldView = new NewFieldView({
-          model: new Field,
+          model: new Field({}),
           settings: this.model,
         });
       
