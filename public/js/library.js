@@ -27,6 +27,10 @@ $(function() {
           _.extend(this, selectable);
         },
         
+        destroy: function(options) {
+          this.trigger('destroy', this, this.collection, options);
+        },
+        
         parse: function(response) {
           dateFields(this).forEach(function(field) {
             if (response.hasOwnProperty(field.name) && response[field.name]) {
@@ -318,6 +322,7 @@ $(function() {
       events: {
         'click #addDocument'        : 'addNewDocument',
         'click #editDocument'       : 'editDocument',
+        'click #deleteDocument'     : 'deleteDocument',
       },
       
       initialize: function(attributes) {
@@ -356,6 +361,31 @@ $(function() {
           });
         }
       },
+      
+      deleteDocument: function() {
+        // TODO: add consent
+        // TODO: add status bar
+        var me = this;
+
+        function deleteDocumentRecursive(selected, keys) {
+          var documentId = keys.shift();
+          var document = selected[documentId];
+          
+          var url = encodeURI('/docs/' + document.constructor.metadata.name + '/' + document.get('name'));
+          
+          request
+            .del(url)
+            .end(function(res) {
+              // TODO: handle error
+              document.destroy();
+                            
+              if (keys.length)
+                deleteDocumentRecursive(selected, keys);
+            });
+        }
+        
+        deleteDocumentRecursive(this.library.selected, Object.keys(this.library.selected));
+      },
 
       addOne: function(item) {
         var view = new exports.DocumentView({
@@ -369,13 +399,13 @@ $(function() {
       },
       
       enableDeleteButton: function() {
-        this.$('#delete')
+        this.$('#deleteDocument')
           .removeClass('disabled')
           .removeAttr('disabled');
       },
 
       disableDeleteButton: function() {
-        this.$('#delete')
+        this.$('#deleteDocument')
           .addClass('disabled')
           .attr('disabled', 'disabled');
       },
