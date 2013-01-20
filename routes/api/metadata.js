@@ -4,7 +4,7 @@ module.exports = function(db) {
     db.collection('_metadata', function(err, collection) {
       if (err) return res.send(500);
 
-      var stream = collection.find({type: type}).stream();
+      var stream = collection.find({ type: type }).sort({ name: 1 }).stream();
       var lists = [];
 
       stream.on('data', function(data) {

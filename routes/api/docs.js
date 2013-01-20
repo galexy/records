@@ -5,7 +5,7 @@ module.exports = function(db) {
       db.collection(req.params.library + '.files', function(err, collection) {
         if (err) return res.send(500);
 
-        var stream = collection.find().stream();
+        var stream = collection.find().sort({ 'metadata.name': 1 }).stream();
         var list = [];
 
         stream.on('data', function(data) {
