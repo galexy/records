@@ -6329,6 +6329,37 @@ body {
 .document-area {
   height: 100%;
 }
+.overlay {
+  width: 500px;
+  height: 400px;
+  position: fixed;
+  bottom: 0px;
+  right: 40px;
+  background-color: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.3);
+  -webkit-border-top-right-radius: 6px;
+  -moz-border-radius-topright: 6px;
+  border-top-right-radius: 6px;
+  -webkit-border-top-left-radius: 6px;
+  -moz-border-radius-topleft: 6px;
+  border-top-left-radius: 6px;
+  -webkit-box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+  -moz-box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+  -webkit-background-clip: padding-box;
+  -moz-background-clip: padding-box;
+  background-clip: padding-box;
+}
+.overlay .overlay-header {
+  padding: 5px;
+  background: #f5f5f5;
+}
+.overlay .overlay-header .close {
+  line-height: 16px;
+}
+.overlay .overlay-body td .progress {
+  margin-bottom: 0px;
+}
 /* ===== Primary Styles ========================================================
    Author:
    ========================================================================== */

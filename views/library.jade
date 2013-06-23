@@ -39,15 +39,16 @@ block content
           i.icon-wrench
           | Configure
 
-  table.table.table-striped.table-condensed
-    thead
-      tr
-        th
-          input#selectAll(type="checkbox")
-        each field, i in metadata.fields
+  .document-area
+    table.table.table-striped.table-condensed
+      thead
+        tr
           th
-            | #{field.heading}
-    tbody
+            input#selectAll(type="checkbox")
+          each field, i in metadata.fields
+            th
+              | #{field.heading}
+      tbody
 
   script#documentTemplate(type="template")
     td
@@ -97,3 +98,26 @@ block modal
     .modal-footer
       a#editDocumentCancel.btn.btn-inverse(href="#") Cancel
       a#editDocumentSubmit.btn.btn-primary.submit(href="#") Update
+
+  #uploadStatus.overlay.hidden
+    .overlay-header
+      span Uploads
+      button.close.pull-right &times
+    .overlay-body
+      table.table.table-hover
+        thead
+          tr
+            th File
+            th Status
+        tbody
+
+  script#uploadDocumentTemplate(type="template")
+    td
+      a(href="#") {{name}}
+    td
+      {{#if _progressNumber}}
+      .progress.progress-striped.active
+        .bar(style="width: {{_progress}}%;")
+      {{else}}
+      span {{_progress}}
+      {{/if}}

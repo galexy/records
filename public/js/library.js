@@ -48,6 +48,33 @@ $(function() {
             }
           })
           return json;
+        },
+
+        upload: function(file, success) {
+          var self = this;
+          var fileName = this.get('name');
+          var urlPath = '/docs/' + this.constructor.metadata.name + '/' + fileName;
+
+          var xhr = new XMLHttpRequest();
+          xhr.upload.addEventListener('progress', function(e) {
+            self.set('_progress', Math.round((e.position / e.total) * 100));
+          }, false);
+          xhr.upload.addEventListener('load', function(e) {
+            self.set('_progress', 'Finishing')
+            self.unset('_progressNumber')
+          }, false);
+          xhr.onload = function(e) {
+            if (this.status == 200 && success) {
+              self.set('_progress', 'Uploaded')
+              success();
+            }
+          };
+          xhr.open('PUT', urlPath, true);
+          xhr.setRequestHeader('Content-Type', file.type);
+          xhr.send(file);
+
+          this.set('_progress', 0);
+          this.set('_progressNumber', true);
         }
       })
     };
@@ -203,26 +230,19 @@ $(function() {
 
       submit: function(e) {
         var self = this;
-        
-        e.preventDefault();
-        
-        var file = this.$("input[type='file']")[0].files[0];
-        var fileName = this.model.get('name');
-        
-        var xhr = new XMLHttpRequest();
-        xhr.open('PUT', '/docs/' + this.model.constructor.metadata.name + '/' + fileName, true);
-        xhr.setRequestHeader("Content-Type", file.type);
-        xhr.onload = function(e) {
-          if (this.status == 200) {
-            console.log(this.response);
 
-            var newModelJson = self.model.toJSON();
-            delete newModelJson._file;
-            self.library.create(newModelJson);
-            self.$el.modal('hide');
-          }
-        };
-        xhr.send(file);
+        e.preventDefault();
+
+        var file = this.$("input[type='file']")[0].files[0];
+
+        self.model.upload(file, function() {
+          self.model.unset('_progressNumber');
+          self.model.unset('_file');
+
+          var newModelJson = self.model.toJSON();
+          self.library.create(newModelJson);
+          self.$el.modal('hide');
+        });
       },
     });
     
@@ -323,6 +343,9 @@ $(function() {
         'click #addDocument'        : 'addNewDocument',
         'click #editDocument'       : 'editDocument',
         'click #deleteDocument'     : 'deleteDocument',
+        'dragenter .document-area'  : 'dragenter',
+        'dragover .document-area'   : 'dragover',
+        'drop .document-area'       : 'dropFiles'
       },
       
       initialize: function(attributes) {
@@ -339,6 +362,11 @@ $(function() {
         this.library.on('select:none', this.deselected, this);
 
         this.library.fetch();
+
+        this.uploadStatusView = new exports.UploadStatusView({
+          library: this.library,
+          modelType: this.modelType
+        });
       },
       
       render: function() {
@@ -385,6 +413,27 @@ $(function() {
         }
         
         deleteDocumentRecursive(this.library.selected, Object.keys(this.library.selected));
+      },
+
+      dragenter: function(e) {
+        e.stopPropagation();
+        e.preventDefault();
+      },
+
+      dragover: function(e) {
+        e.originalEvent.dataTransfer.dropEffect = "copy";
+
+        e.stopPropagation();
+        e.preventDefault();
+      },
+
+      dropFiles: function(e) {
+        e.stopPropagation();
+        e.preventDefault();
+
+        e = e.originalEvent;
+
+        this.uploadStatusView.upload(e.dataTransfer.files);
       },
 
       addOne: function(item) {
@@ -451,8 +500,91 @@ $(function() {
         this.library.toggleSelectAll();
       }      
     });
-    
-    
+
+    exports.UploadDocumentView = Backbone.View.extend({
+      tagName: 'tr',
+
+      template: Handlebars.compile($('#uploadDocumentTemplate').text()),
+
+      initialize: function(attributes) {
+        this.model.on('change', this.render, this);  
+      },
+
+      render: function() {
+        this.$el.html(this.template(this.model.attributes));
+
+        return this;
+      }
+    });
+
+    exports.UploadStatusView = Backbone.View.extend({
+      el: $('#uploadStatus'),
+
+      initialize: function(attributes) {
+        this.collection = new Backbone.Collection([], {
+          url: attributes.library.url,
+          model: attributes.modelType
+        });
+        this.library = attributes.library;
+
+        this.collection.on('add', this.addFile, this);
+      },
+
+      events: {
+        'click .close': 'hide'
+      },
+
+      render: function() {
+        return this;
+      },
+
+      show: function() {
+        this.$el.removeClass('hidden');
+      },
+
+      hide: function() {
+        this.$el.addClass('hidden');
+      },
+
+      upload: function(files) {
+        var self = this;
+
+        this.show();
+        files = Array.prototype.filter.call(files, function(e) { return true; });
+        _.chain(files)
+          .map(function(f) { return {name: f.name, _progress: 'Queued', _file: f} })
+          .each(function(f) {
+            var doc = self.collection.add(f);
+          });
+        this.uploadNext();
+      },
+
+      uploadNext: function() {
+        var self = this;
+        var nextToUpload = this.collection
+          .chain()
+          .filter(function(d) { return d.get('_progress') == 'Queued'; })
+          .first()
+          .value();
+
+        if (nextToUpload) {
+          nextToUpload.upload(nextToUpload.get('_file'), function() {
+            nextToUpload.unset('_file');
+            nextToUpload.unset('_progressNumber');
+            self.library.add(nextToUpload);
+            self.uploadNext();
+          });
+        }
+      },
+
+      addFile: function(document) {
+        var view = new exports.UploadDocumentView({
+          model: document
+        });
+        this.$('tbody').append(view.render().el);
+      }
+    })
+
   })(window.Libraries);
   
 })

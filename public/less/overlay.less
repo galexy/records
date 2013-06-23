@@ -1,0 +1,32 @@
+@midgray: #F5F5F5;
+
+.overlay {
+  width: 500px;
+  height: 400px;
+  position: fixed;
+  bottom: 0px;
+  right: 40px;
+
+  background-color: @white;
+  border: 1px solid rgba(0,0,0,.3);
+  .border-top-radius(6px);
+  .box-shadow(0 3px 7px rgba(0,0,0,0.3));
+  .background-clip(padding-box);
+
+  .overlay-header {
+    padding: 5px;
+    background: @midgray;
+
+    .close {
+      line-height: 16px;
+    }
+  }
+
+  .overlay-body {
+    td .progress {
+      margin-bottom: 0px;
+    }
+  }
+}  
+
+
