@@ -100,6 +100,7 @@ $(function() {
       events: {
         'click input[type="checkbox"].selector' : 'select',
         'click'                                 : 'select',
+        'dblclick'                              : 'edit',
         'click .namefield'                      : 'nameclick',
       },
 
@@ -120,6 +121,12 @@ $(function() {
       select: function(e) {
         e.stopPropagation();
         this.model.toggleSelected();
+      },
+
+      edit: function(e) {
+        var editView = new exports.EditDocumentView({
+          model: this.model
+        });
       },
       
       nameclick: function(e) {
