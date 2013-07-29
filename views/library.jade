@@ -47,7 +47,7 @@ block content
             input#selectAll(type="checkbox")
           each field, i in metadata.fields
             th
-              | #{field.heading}
+              span.heading #{field.heading}
       tbody
 
   script#documentTemplate(type="template")

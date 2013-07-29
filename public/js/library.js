@@ -352,7 +352,8 @@ $(function() {
         'click #deleteDocument'     : 'deleteDocument',
         'dragenter .document-area'  : 'dragenter',
         'dragover .document-area'   : 'dragover',
-        'drop .document-area'       : 'dropFiles'
+        'drop .document-area'       : 'dropFiles',
+        'click .heading'            : 'sortBy'
       },
       
       initialize: function(attributes) {
@@ -363,6 +364,7 @@ $(function() {
         
         this.library.on('add', this.addOne, this);
         this.library.on('reset', this.addAll, this);
+        this.library.on('sort', this.addAll, this);
         this.library.on('all', this.render, this);
         this.library.on('select:some', this.selectedSome, this);
         this.library.on('select:all', this.selectedAll, this);
@@ -378,6 +380,13 @@ $(function() {
       
       render: function() {
         return this;
+      },
+
+      sortBy: function(e) {
+        var index = this.$el.find('thead th span').index(e.target);
+        var fieldName = this.modelType.metadata.fields[index].name;
+        this.library.comparator = fieldName;
+        this.library.sort();
       },
       
       addNewDocument: function() {
@@ -451,6 +460,7 @@ $(function() {
       },
 
       addAll: function() {
+        this.table.empty();
         this.library.each($.proxy(this.addOne, this));
       },
       
